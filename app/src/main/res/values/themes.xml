@@ -1,0 +1,4 @@
+<resources>
+
+    <style name="Theme.Trixo" parent="Theme.MaterialComponents.Light" />
+</resources>
