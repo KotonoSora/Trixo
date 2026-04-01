@@ -2,16 +2,22 @@ package com.kotonosora.trixo.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-// Neon Arcade Palette
+// Neon Arcade Palette (SudoBlitz Reference)
+val DarkBackground = Color(0xFF0A0A12)
+val NeonGreen = Color(0xFF39FF14)
+val NeonYellow = Color(0xFFFFEA00)
 val NeonCyan = Color(0xFF00FFFF)
 val NeonMagenta = Color(0xFFFF00FF)
-val NeonYellow = Color(0xFFFFFF00)
-val NeonGreen = Color(0xFF39FF14)
-val NeonRed = Color(0xFFFF3131)
-val NeonPurple = Color(0xFFBC13FE)
+val NeonRed = Color(0xFFFF003C)
+val NeonBlue = Color(0xFF0066FF)
+val GridLineColor = Color(0xFF222244)
+val SurfaceDarkColor = Color(0xFF1A1A2E)
 
-val AppBackgroundDark = Color(0xFF0A0A12)
-val AppSurfaceDark = Color(0xFF151525)
+// Semantic Tokens
+val ErrorRed = NeonRed
+val SuccessGreen = NeonGreen
+val CoinGold = NeonYellow
+val HighlightYellow = NeonYellow
 
 // Material 3 Dark Color Scheme (Strictly Dark)
 val primaryDark = NeonCyan
@@ -34,10 +40,10 @@ val onErrorDark = Color.Black
 val errorContainerDark = NeonRed.copy(alpha = 0.15f)
 val onErrorContainerDark = NeonRed
 
-val backgroundDark = AppBackgroundDark
+val backgroundDark = DarkBackground
 val onBackgroundDark = Color.White
 
-val surfaceDark = AppSurfaceDark
+val surfaceDark = SurfaceDarkColor
 val onSurfaceDark = Color.White
 val surfaceVariantDark = Color(0xFF202035)
 val onSurfaceVariantDark = Color.White

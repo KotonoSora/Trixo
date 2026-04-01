@@ -1,7 +1,6 @@
 package com.kotonosora.trixo.ui.theme
 
 import androidx.compose.material3.Typography
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
@@ -14,13 +13,13 @@ val PressStart2PFontFamily = FontFamily(
     Font(R.font.press_start_2p, FontWeight.Normal)
 )
 
-// Glow Effect Shadow
+// Glow Effect Shadow for Titles
 val NeonGlow = Shadow(
     color = NeonCyan,
     blurRadius = 16f
 )
 
-// Set of Material typography styles to start with
+// Set of Material typography styles using Press Start 2P for all levels
 val Typography = Typography(
     displayLarge = TextStyle(
         fontFamily = PressStart2PFontFamily,
