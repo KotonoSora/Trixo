@@ -1,59 +1,51 @@
+# Trixo ProGuard Rules
+
 # -----------------------------------------------------------------------------------
-# General Android Rules
+# General Rules
 # -----------------------------------------------------------------------------------
 
 # Preserve line number information for debugging stack traces.
 -keepattributes SourceFile,LineNumberTable
 
-# Preserve Annotations and Signatures for Reflection-heavy libraries
+# Preserve Annotations and Signatures for Retrofit, Room, and Moshi
 -keepattributes *Annotation*,Signature,InnerClasses,EnclosingMethod
 
 # -----------------------------------------------------------------------------------
 # Jetpack Compose
 # -----------------------------------------------------------------------------------
+# Compose rules are generally included in the library, but keeping some common ones.
 -keepclassmembers class androidx.compose.ui.platform.ComposeView {
    public *;
 }
--keep class androidx.compose.runtime.Recomposer { *; }
 
 # -----------------------------------------------------------------------------------
-# Room Database
+# Room
 # -----------------------------------------------------------------------------------
 -keep class * extends androidx.room.RoomDatabase
--keep @androidx.room.Entity class *
 -dontwarn androidx.room.paging.**
 
 # -----------------------------------------------------------------------------------
-# Retrofit & OkHttp
+# Retrofit / OkHttp
 # -----------------------------------------------------------------------------------
 -dontwarn retrofit2.**
 -keep class retrofit2.** { *; }
--keepattributes RuntimeVisibleAlphaAnnotations, RuntimeVisibleParameterAnnotations
--keepclassmembers,allowobfuscation interface * {
-    @retrofit2.http.* <methods>;
-}
-
 -dontwarn okhttp3.**
 -dontwarn okio.**
 -dontwarn javax.annotation.**
--keepnames class okhttp3.internal.publicsuffix.PublicSuffixDatabase
 
 # -----------------------------------------------------------------------------------
-# Moshi (JSON Library)
+# Moshi (for JSON parsing)
 # -----------------------------------------------------------------------------------
--keep class com.squareup.moshi.** { *; }
--keep interface com.squareup.moshi.** { *; }
+# Retain generic type information for use by Moshi’s adapters.
+-keep class com.squareup.moshi.* { *; }
+-keep class kotlin.reflect.jvm.internal.** { *; }
 -keep @com.squareup.moshi.JsonQualifier interface *
-
-# Keep generated Moshi adapters
--keep class *JsonAdapter { *; }
--keep class *JsonAdapter {
+-keep @com.squareup.moshi.JsonClass class * {
     <init>(...);
 }
--keep @com.squareup.moshi.JsonClass class *
 
 # -----------------------------------------------------------------------------------
-# Kotlin Coroutines
+# Coroutines
 # -----------------------------------------------------------------------------------
 -keepnames class kotlinx.coroutines.internal.MainDispatcherFactory {}
 -keepnames class kotlinx.coroutines.CoroutineExceptionHandler {}
@@ -69,13 +61,20 @@
 # -----------------------------------------------------------------------------------
 # Coil (Image Loading)
 # -----------------------------------------------------------------------------------
--dontwarn coil.**
+-keep class coil.** { *; }
+-keep class coil.RealImageLoader
+-keepclassmembers class * extends coil.decode.Decoder {
+    public <init>(...);
+}
+-keepclassmembers class * extends coil.fetch.Fetcher {
+    public <init>(...);
+}
+-keepclassmembers class * extends coil.transition.Transition {
+    public <init>(...);
+}
 
 # -----------------------------------------------------------------------------------
-# App Specific Models
+# Trixo Models
 # -----------------------------------------------------------------------------------
-# Keep all data models and domain objects to prevent issues with serialization/DB
--keep class com.kotonosora.trixo.domain.** { *; }
--keep class com.kotonosora.trixo.data.** { *; }
--keepclassmembers class com.kotonosora.trixo.domain.** { *; }
--keepclassmembers class com.kotonosora.trixo.data.** { *; }
+# Ensure your data models are not obfuscated to avoid issues with Room or Moshi
+-keepclassmembers class com.jn.trixo.model.** { *; }
