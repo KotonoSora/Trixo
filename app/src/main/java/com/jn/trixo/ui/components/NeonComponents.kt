@@ -19,6 +19,7 @@ import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.jn.trixo.audio.LocalSoundManager
@@ -99,7 +100,8 @@ fun NeonTitle(
     text: String,
     modifier: Modifier = Modifier,
     color: Color = NeonCyan,
-    fontSize: Int = 36
+    fontSize: Int = 36,
+    textAlign: TextAlign = TextAlign.Start,
 ) {
     Text(
         text = text,
@@ -112,7 +114,8 @@ fun NeonTitle(
             shadow = Shadow(
                 color = color,
                 blurRadius = 16f
-            )
+            ),
+            textAlign = textAlign,
         )
     )
 }

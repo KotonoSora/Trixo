@@ -16,6 +16,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.jn.trixo.ui.theme.NeonCyan
 import com.jn.trixo.ui.theme.NeonYellow
@@ -48,7 +49,7 @@ fun TrixoTopBar(
             if (onBackClick == null) {
                 Spacer(modifier = Modifier.width(4.dp))
             }
-            NeonTitle(title, fontSize = 24)
+            NeonTitle(title, fontSize = 24, textAlign = TextAlign.Start)
         }
 
         Spacer(modifier = Modifier.weight(1f))

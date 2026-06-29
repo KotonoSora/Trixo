@@ -5,42 +5,46 @@ import androidx.compose.animation.core.tween
 import androidx.compose.animation.scaleIn
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.EmojiEvents
-import androidx.compose.material.icons.rounded.SentimentDissatisfied
-import androidx.compose.material.icons.rounded.SentimentNeutral
+import androidx.compose.material.icons.rounded.MonetizationOn
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.jn.trixo.audio.LocalSoundManager
+import com.jn.trixo.audio.SoundManager
+import com.jn.trixo.domain.Difficulty
 import com.jn.trixo.domain.GameResult
+import com.jn.trixo.domain.GameState
 import com.jn.trixo.domain.GameViewModel
 import com.jn.trixo.ui.MainViewModel
 import com.jn.trixo.ui.components.NeonButton
 import com.jn.trixo.ui.components.NeonText
 import com.jn.trixo.ui.components.NeonTitle
 import com.jn.trixo.ui.components.TrixoTopBar
-import com.jn.trixo.ui.theme.NeonCyan
+import com.jn.trixo.ui.theme.NeonGreen
 import com.jn.trixo.ui.theme.NeonMagenta
 import com.jn.trixo.ui.theme.NeonRed
 import com.jn.trixo.ui.theme.NeonYellow
+import com.jn.trixo.ui.theme.TrixoTheme
 
 @Composable
 fun ResultScreen(
@@ -48,21 +52,50 @@ fun ResultScreen(
     mainViewModel: MainViewModel,
     onNavigateHome: () -> Unit,
     onNavigateToGameMode: () -> Unit,
+    onNavigateToNextLevel: (Difficulty) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val gameState by gameViewModel.gameState.collectAsState()
     val userPreferences by mainViewModel.userPreferences.collectAsState()
-    var visible by remember { mutableStateOf(false) }
 
-    LaunchedEffect(Unit) {
-        visible = true
+    ResultScreenContent(
+        gameState = gameState,
+        coins = userPreferences.coins,
+        onNavigateHome = onNavigateHome,
+        onNavigateToGameMode = onNavigateToGameMode,
+        onNavigateToNextLevel = onNavigateToNextLevel,
+        modifier = modifier
+    )
+}
+
+@Composable
+fun ResultScreenContent(
+    gameState: GameState,
+    coins: Int,
+    onNavigateHome: () -> Unit,
+    onNavigateToGameMode: () -> Unit,
+    onNavigateToNextLevel: (Difficulty) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val nextDifficulty = when (gameState.difficulty) {
+        Difficulty.EASY -> Difficulty.MEDIUM
+        Difficulty.MEDIUM -> Difficulty.HARD
+        Difficulty.HARD -> Difficulty.VERY_HARD
+        Difficulty.VERY_HARD -> null
+    }
+
+    val topBarTitle = when (gameState.result) {
+        GameResult.X_WINS -> "VICTORY"
+        GameResult.O_WINS -> "GAME OVER"
+        GameResult.DRAW -> "DRAW GAME"
+        else -> "RESULT"
     }
 
     Scaffold(
         topBar = {
             TrixoTopBar(
-                coins = userPreferences.coins,
-                title = "GAME OVER"
+                coins = coins,
+                title = topBarTitle
             )
         },
         containerColor = MaterialTheme.colorScheme.background,
@@ -72,75 +105,140 @@ fun ResultScreen(
             modifier = Modifier
                 .padding(innerPadding)
                 .fillMaxSize()
-                .padding(32.dp),
-            verticalArrangement = Arrangement.Center,
+                .padding(horizontal = 32.dp, vertical = 24.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+            Spacer(modifier = Modifier.weight(1f))
+
             AnimatedVisibility(
-                visible = visible,
+                visible = true,
                 enter = scaleIn(animationSpec = tween(500))
             ) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     when (gameState.result) {
                         GameResult.X_WINS -> {
-                            Icon(
-                                imageVector = Icons.Rounded.EmojiEvents,
-                                contentDescription = "Win",
-                                modifier = Modifier.size(120.dp),
-                                tint = NeonCyan
-                            )
-                            Spacer(modifier = Modifier.height(16.dp))
-                            NeonTitle("YOU WIN!", color = NeonCyan)
-                            Spacer(modifier = Modifier.height(8.dp))
-                            NeonText("+50 COINS", color = NeonYellow, fontWeight = FontWeight.Bold)
+                            NeonTitle("VICTORY!", color = NeonGreen, fontSize = 36)
+                            Spacer(modifier = Modifier.height(24.dp))
+                            RewardDisplay(amount = 50, iconSize = 32, fontSize = 36)
                         }
 
                         GameResult.O_WINS -> {
-                            Icon(
-                                imageVector = Icons.Rounded.SentimentDissatisfied,
-                                contentDescription = "Lose",
-                                modifier = Modifier.size(120.dp),
-                                tint = NeonRed
-                            )
-                            Spacer(modifier = Modifier.height(16.dp))
-                            NeonTitle("AI WINS!", color = NeonRed)
+                            NeonTitle("GAME OVER", color = NeonRed, fontSize = 48, textAlign = TextAlign.Center)
                         }
 
                         GameResult.DRAW -> {
-                            Icon(
-                                imageVector = Icons.Rounded.SentimentNeutral,
-                                contentDescription = "Draw",
-                                modifier = Modifier.size(120.dp),
-                                tint = NeonMagenta
-                            )
-                            Spacer(modifier = Modifier.height(16.dp))
-                            NeonTitle("DRAW!", color = NeonMagenta)
-                            Spacer(modifier = Modifier.height(8.dp))
-                            NeonText("+10 COINS", color = NeonYellow, fontWeight = FontWeight.Bold)
+                            NeonTitle("DRAW GAME", color = NeonMagenta, fontSize = 36)
+                            Spacer(modifier = Modifier.height(24.dp))
+                            RewardDisplay(amount = 10, iconSize = 28, fontSize = 28)
                         }
 
                         else -> {
-                            NeonTitle("INTERRUPTED", color = Color.Gray)
+                            NeonTitle("ABORTED", color = Color.Gray, fontSize = 36)
                         }
                     }
                 }
             }
 
-            Spacer(modifier = Modifier.height(48.dp))
+            Spacer(modifier = Modifier.weight(1f))
 
-            NeonButton(
-                text = "PLAY AGAIN",
-                onClick = onNavigateToGameMode,
-                modifier = Modifier.fillMaxWidth()
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            NeonButton(
-                text = "HOME",
-                onClick = onNavigateHome,
+            Column(
                 modifier = Modifier.fillMaxWidth(),
-                color = NeonMagenta
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                if (gameState.result == GameResult.X_WINS && nextDifficulty != null && !gameState.isPvP) {
+                    NeonButton(
+                        text = "NEXT LEVEL",
+                        onClick = { onNavigateToNextLevel(nextDifficulty) },
+                        modifier = Modifier.fillMaxWidth(),
+                        color = NeonGreen
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+                }
+
+                NeonButton(
+                    text = "PLAY AGAIN",
+                    onClick = onNavigateToGameMode,
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                NeonButton(
+                    text = "HOME",
+                    onClick = onNavigateHome,
+                    modifier = Modifier.fillMaxWidth(),
+                    color = NeonMagenta
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun RewardDisplay(amount: Int, iconSize: Int, fontSize: Int) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.Center
+    ) {
+        NeonText(
+            "+$amount",
+            color = NeonYellow,
+            fontSize = fontSize,
+            fontWeight = FontWeight.Bold
+        )
+        Spacer(modifier = Modifier.width(8.dp))
+        Icon(
+            imageVector = Icons.Rounded.MonetizationOn,
+            contentDescription = "Coins",
+            tint = NeonYellow,
+            modifier = Modifier.size(iconSize.dp)
+        )
+    }
+}
+
+@Preview(showBackground = true, name = "Win State")
+@Composable
+fun ResultScreenWinPreview() {
+    CompositionLocalProvider(LocalSoundManager provides SoundManager(null)) {
+        TrixoTheme {
+            ResultScreenContent(
+                gameState = GameState(result = GameResult.X_WINS, difficulty = Difficulty.EASY),
+                coins = 150,
+                onNavigateHome = {},
+                onNavigateToGameMode = {},
+                onNavigateToNextLevel = {}
+            )
+        }
+    }
+}
+
+@Preview(showBackground = true, name = "Lose State")
+@Composable
+fun ResultScreenLosePreview() {
+    CompositionLocalProvider(LocalSoundManager provides SoundManager(null)) {
+        TrixoTheme {
+            ResultScreenContent(
+                gameState = GameState(result = GameResult.O_WINS, difficulty = Difficulty.MEDIUM),
+                coins = 100,
+                onNavigateHome = {},
+                onNavigateToGameMode = {},
+                onNavigateToNextLevel = {}
+            )
+        }
+    }
+}
+
+@Preview(showBackground = true, name = "Draw State")
+@Composable
+fun ResultScreenDrawPreview() {
+    CompositionLocalProvider(LocalSoundManager provides SoundManager(null)) {
+        TrixoTheme {
+            ResultScreenContent(
+                gameState = GameState(result = GameResult.DRAW, difficulty = Difficulty.HARD),
+                coins = 120,
+                onNavigateHome = {},
+                onNavigateToGameMode = {},
+                onNavigateToNextLevel = {}
             )
         }
     }

@@ -76,6 +76,12 @@ fun TrixoApp(
                     navController.navigate(TrixoDestinations.GAME_MODE) {
                         popUpTo(TrixoDestinations.HOME) { inclusive = false }
                     }
+                },
+                onNavigateToNextLevel = { nextDifficulty ->
+                    gameViewModel.resetGame(nextDifficulty, isPvP = false)
+                    navController.navigate(TrixoDestinations.GAMEPLAY) {
+                        popUpTo(TrixoDestinations.HOME) { inclusive = false }
+                    }
                 }
             )
         }
