@@ -15,12 +15,9 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.EmojiEvents
 import androidx.compose.material.icons.rounded.SentimentDissatisfied
 import androidx.compose.material.icons.rounded.SentimentNeutral
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -32,7 +29,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.jn.trixo.domain.GameResult
 import com.jn.trixo.domain.GameViewModel
@@ -40,13 +36,12 @@ import com.jn.trixo.ui.MainViewModel
 import com.jn.trixo.ui.components.NeonButton
 import com.jn.trixo.ui.components.NeonText
 import com.jn.trixo.ui.components.NeonTitle
+import com.jn.trixo.ui.components.TrixoTopBar
 import com.jn.trixo.ui.theme.NeonCyan
 import com.jn.trixo.ui.theme.NeonMagenta
 import com.jn.trixo.ui.theme.NeonRed
 import com.jn.trixo.ui.theme.NeonYellow
-import com.jn.trixo.ui.theme.TrixoTheme
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ResultScreen(
     gameViewModel: GameViewModel,
@@ -56,6 +51,7 @@ fun ResultScreen(
     modifier: Modifier = Modifier
 ) {
     val gameState by gameViewModel.gameState.collectAsState()
+    val userPreferences by mainViewModel.userPreferences.collectAsState()
     var visible by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
@@ -64,9 +60,9 @@ fun ResultScreen(
 
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = { NeonTitle("GAME OVER", fontSize = 24) },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
+            TrixoTopBar(
+                coins = userPreferences.coins,
+                title = "GAME OVER"
             )
         },
         containerColor = MaterialTheme.colorScheme.background,
@@ -98,6 +94,7 @@ fun ResultScreen(
                             Spacer(modifier = Modifier.height(8.dp))
                             NeonText("+50 COINS", color = NeonYellow, fontWeight = FontWeight.Bold)
                         }
+
                         GameResult.O_WINS -> {
                             Icon(
                                 imageVector = Icons.Rounded.SentimentDissatisfied,
@@ -108,6 +105,7 @@ fun ResultScreen(
                             Spacer(modifier = Modifier.height(16.dp))
                             NeonTitle("AI WINS!", color = NeonRed)
                         }
+
                         GameResult.DRAW -> {
                             Icon(
                                 imageVector = Icons.Rounded.SentimentNeutral,
@@ -120,6 +118,7 @@ fun ResultScreen(
                             Spacer(modifier = Modifier.height(8.dp))
                             NeonText("+10 COINS", color = NeonYellow, fontWeight = FontWeight.Bold)
                         }
+
                         else -> {
                             NeonTitle("INTERRUPTED", color = Color.Gray)
                         }

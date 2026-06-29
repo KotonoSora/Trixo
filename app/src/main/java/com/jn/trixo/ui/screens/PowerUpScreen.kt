@@ -3,32 +3,24 @@ package com.jn.trixo.ui.screens
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.rounded.History
 import androidx.compose.material.icons.rounded.Lightbulb
-import androidx.compose.material.icons.rounded.MonetizationOn
 import androidx.compose.material.icons.rounded.ShoppingCart
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -43,14 +35,13 @@ import androidx.compose.ui.unit.dp
 import com.jn.trixo.audio.LocalSoundManager
 import com.jn.trixo.ui.MainViewModel
 import com.jn.trixo.ui.components.NeonButton
-import com.jn.trixo.ui.components.NeonIconButton
 import com.jn.trixo.ui.components.NeonText
 import com.jn.trixo.ui.components.NeonTitle
+import com.jn.trixo.ui.components.TrixoTopBar
 import com.jn.trixo.ui.theme.NeonCyan
 import com.jn.trixo.ui.theme.NeonMagenta
 import com.jn.trixo.ui.theme.NeonYellow
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PowerUpScreen(
     mainViewModel: MainViewModel,
@@ -64,31 +55,10 @@ fun PowerUpScreen(
 
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = { NeonTitle("POWER-UPS", fontSize = 24) },
-                navigationIcon = {
-                    NeonIconButton(
-                        icon = Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = "Back",
-                        onClick = onNavigateBack,
-                        tint = NeonCyan
-                    )
-                },
-                actions = {
-                    Row(
-                        modifier = Modifier.padding(end = 16.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Icon(Icons.Rounded.MonetizationOn, contentDescription = "Coins", tint = Color(0xFFD4AF37))
-                        Spacer(modifier = Modifier.width(8.dp))
-                        NeonText(
-                            text = "${userPreferences.coins}",
-                            color = Color.White,
-                            fontWeight = FontWeight.Bold
-                        )
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
+            TrixoTopBar(
+                coins = userPreferences.coins,
+                title = "POWER-UPS",
+                onBackClick = onNavigateBack
             )
         },
         containerColor = MaterialTheme.colorScheme.background,
@@ -161,7 +131,7 @@ fun PowerUpScreen(
                 color = NeonCyan,
                 icon = Icons.Rounded.ShoppingCart
             )
-            
+
             Spacer(modifier = Modifier.height(24.dp))
         }
     }

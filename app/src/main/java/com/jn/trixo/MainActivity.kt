@@ -25,7 +25,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-        
+
         // Initialize DataStore and Repository
         val repository = UserPreferencesRepository(applicationContext.dataStore)
         viewModel = ViewModelProvider(
@@ -36,7 +36,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             val soundManager = remember { SoundManager(applicationContext) }
             val userPrefs by viewModel.userPreferences.collectAsState()
-            
+
             soundManager.soundEnabled = userPrefs.soundEnabled
 
             DisposableEffect(Unit) {

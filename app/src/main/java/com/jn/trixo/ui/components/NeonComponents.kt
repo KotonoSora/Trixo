@@ -1,9 +1,6 @@
 package com.jn.trixo.ui.components
 
-import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -15,10 +12,8 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.composed
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -30,24 +25,6 @@ import com.jn.trixo.audio.LocalSoundManager
 import com.jn.trixo.ui.theme.NeonCyan
 import com.jn.trixo.ui.theme.PressStart2PFontFamily
 
-/**
- * Custom modifier that automatically plays a tap sound when clicked.
- */
-fun Modifier.neonClickable(
-    enabled: Boolean = true,
-    onClick: () -> Unit
-): Modifier = composed {
-    val soundManager = LocalSoundManager.current
-    this.clickable(
-        enabled = enabled,
-        interactionSource = remember { MutableInteractionSource() },
-        indication = LocalIndication.current,
-        onClick = {
-            soundManager.playTap()
-            onClick()
-        }
-    )
-}
 
 @Composable
 fun NeonButton(
@@ -61,7 +38,7 @@ fun NeonButton(
     fontSize: Int = 16
 ) {
     val soundManager = LocalSoundManager.current
-    
+
     Button(
         onClick = {
             soundManager.playTap()

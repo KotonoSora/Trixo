@@ -40,20 +40,21 @@ fun TrixoApp(
                 onNavigateToSettings = { navController.navigate(TrixoDestinations.SETTINGS) }
             )
         }
-        
+
         composable(TrixoDestinations.GAME_MODE) {
             GameModeScreen(
                 gameViewModel = gameViewModel,
+                mainViewModel = viewModel,
                 onNavigateBack = { navController.popBackStack() },
                 onNavigateToGameplay = { navController.navigate(TrixoDestinations.GAMEPLAY) }
             )
         }
-        
+
         composable(TrixoDestinations.GAMEPLAY) {
             GameplayScreen(
                 gameViewModel = gameViewModel,
                 mainViewModel = viewModel,
-                onNavigateToResult = { 
+                onNavigateToResult = {
                     navController.navigate(TrixoDestinations.RESULT) {
                         popUpTo(TrixoDestinations.GAME_MODE) { inclusive = false }
                     }
@@ -61,7 +62,7 @@ fun TrixoApp(
                 onNavigateBack = { navController.popBackStack() }
             )
         }
-        
+
         composable(TrixoDestinations.RESULT) {
             ResultScreen(
                 gameViewModel = gameViewModel,
@@ -78,21 +79,21 @@ fun TrixoApp(
                 }
             )
         }
-        
+
         composable(TrixoDestinations.COIN_SHOP) {
             CoinShopScreen(
                 mainViewModel = viewModel,
                 onNavigateBack = { navController.popBackStack() }
             )
         }
-        
+
         composable(TrixoDestinations.PROGRESS) {
             ProgressScreen(
                 mainViewModel = viewModel,
                 onNavigateBack = { navController.popBackStack() }
             )
         }
-        
+
         composable(TrixoDestinations.SETTINGS) {
             SettingsScreen(
                 mainViewModel = viewModel,

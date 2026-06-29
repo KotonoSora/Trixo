@@ -52,14 +52,14 @@ class GameViewModel : ViewModel() {
 
         val newBoard = state.board.toMutableList()
         newBoard[index] = state.currentPlayer
-        
+
         val (result, winLine) = getFullBoardResult(newBoard, state.boardSize, state.winRequirement)
-        
+
         if (result != GameResult.NONE) {
             _gameState.value = state.copy(
-                board = newBoard, 
-                result = result, 
-                winningLine = winLine, 
+                board = newBoard,
+                result = result,
+                winningLine = winLine,
                 hintIndex = null,
                 history = currentHistory
             )
@@ -68,13 +68,13 @@ class GameViewModel : ViewModel() {
             val isNextAiTurn = !state.isPvP && nextPlayer == Player.O
 
             _gameState.value = state.copy(
-                board = newBoard, 
-                currentPlayer = nextPlayer, 
-                isAiTurn = isNextAiTurn, 
+                board = newBoard,
+                currentPlayer = nextPlayer,
+                isAiTurn = isNextAiTurn,
                 hintIndex = null,
                 history = currentHistory
             )
-            
+
             if (isNextAiTurn) {
                 playAIMove(gameSessionId)
             }
@@ -84,7 +84,7 @@ class GameViewModel : ViewModel() {
     fun undoMove() {
         val state = _gameState.value
         if (state.history.isEmpty() || state.isAiTurn || state.result != GameResult.NONE) return
-        
+
         val lastBoard = state.history.last()
         _gameState.value = state.copy(
             board = lastBoard,
@@ -100,8 +100,9 @@ class GameViewModel : ViewModel() {
     fun requestHint() {
         val state = _gameState.value
         if (state.result != GameResult.NONE || state.isAiTurn) return
-        
-        val move = findBestMove(state.board, state.currentPlayer, state.boardSize, state.winRequirement)
+
+        val move =
+            findBestMove(state.board, state.currentPlayer, state.boardSize, state.winRequirement)
         if (move != -1) {
             _gameState.value = state.copy(hintIndex = move)
         }
@@ -119,8 +120,12 @@ class GameViewModel : ViewModel() {
             if (move != -1) {
                 val newBoard = state.board.toMutableList()
                 newBoard[move] = Player.O
-                
-                val (result, winLine) = getFullBoardResult(newBoard, state.boardSize, state.winRequirement)
+
+                val (result, winLine) = getFullBoardResult(
+                    newBoard,
+                    state.boardSize,
+                    state.winRequirement
+                )
                 _gameState.value = state.copy(
                     board = newBoard,
                     currentPlayer = Player.X,
@@ -134,7 +139,8 @@ class GameViewModel : ViewModel() {
 
     private fun findBestMove(board: List<Player>, aiPlayer: Player, size: Int, winReq: Int): Int {
         val humanPlayer = if (aiPlayer == Player.X) Player.O else Player.X
-        val availableMoves = board.mapIndexedNotNull { index, player -> if (player == Player.NONE) index else null }
+        val availableMoves =
+            board.mapIndexedNotNull { index, player -> if (player == Player.NONE) index else null }
         if (availableMoves.isEmpty()) return -1
 
         // 1. Check for AI win
@@ -175,7 +181,14 @@ class GameViewModel : ViewModel() {
         return availableMoves.random()
     }
 
-    private fun checkLineForWin(board: List<Player>, r: Int, c: Int, player: Player, size: Int, winReq: Int): Boolean {
+    private fun checkLineForWin(
+        board: List<Player>,
+        r: Int,
+        c: Int,
+        player: Player,
+        size: Int,
+        winReq: Int
+    ): Boolean {
         val directions = listOf(Pair(0, 1), Pair(1, 0), Pair(1, 1), Pair(1, -1))
         for ((dr, dc) in directions) {
             var count = 1
@@ -220,9 +233,13 @@ class GameViewModel : ViewModel() {
         return false
     }
 
-    private fun getFullBoardResult(board: List<Player>, size: Int, winReq: Int): Pair<GameResult, List<Int>?> {
+    private fun getFullBoardResult(
+        board: List<Player>,
+        size: Int,
+        winReq: Int
+    ): Pair<GameResult, List<Int>?> {
         val directions = listOf(Pair(0, 1), Pair(1, 0), Pair(1, 1), Pair(1, -1))
-        
+
         for (r in 0 until size) {
             for (c in 0 until size) {
                 val p = board[r * size + c]
@@ -242,7 +259,10 @@ class GameViewModel : ViewModel() {
                         }
                     }
                     if (valid) {
-                        return Pair(if (p == Player.X) GameResult.X_WINS else GameResult.O_WINS, line)
+                        return Pair(
+                            if (p == Player.X) GameResult.X_WINS else GameResult.O_WINS,
+                            line
+                        )
                     }
                 }
             }

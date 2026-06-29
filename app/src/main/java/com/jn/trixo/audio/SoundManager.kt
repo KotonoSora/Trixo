@@ -16,7 +16,7 @@ class SoundManager(context: Context) {
             .setUsage(AudioAttributes.USAGE_GAME)
             .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
             .build()
-        
+
         soundPool = SoundPool.Builder()
             .setMaxStreams(10)
             .setAudioAttributes(attributes)

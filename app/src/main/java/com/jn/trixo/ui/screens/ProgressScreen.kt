@@ -14,34 +14,28 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.rounded.EmojiEvents
 import androidx.compose.material.icons.rounded.VideogameAsset
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.jn.trixo.ui.MainViewModel
-import com.jn.trixo.ui.components.NeonIconButton
 import com.jn.trixo.ui.components.NeonText
 import com.jn.trixo.ui.components.NeonTitle
+import com.jn.trixo.ui.components.TrixoTopBar
 import com.jn.trixo.ui.theme.NeonCyan
 import com.jn.trixo.ui.theme.NeonMagenta
 import com.jn.trixo.ui.theme.NeonYellow
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProgressScreen(
     mainViewModel: MainViewModel,
@@ -56,17 +50,10 @@ fun ProgressScreen(
 
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = { NeonTitle("STATS", fontSize = 24) },
-                navigationIcon = {
-                    NeonIconButton(
-                        icon = Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = "Back",
-                        onClick = onNavigateBack,
-                        tint = NeonCyan
-                    )
-                },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
+            TrixoTopBar(
+                coins = userPreferences.coins,
+                title = "STATS",
+                onBackClick = onNavigateBack
             )
         },
         containerColor = MaterialTheme.colorScheme.background,
@@ -109,7 +96,10 @@ fun ProgressScreen(
 
             Spacer(modifier = Modifier.height(32.dp))
 
-            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
                 // Played Card
                 Box(
                     modifier = Modifier
@@ -121,14 +111,19 @@ fun ProgressScreen(
                     contentAlignment = Alignment.Center
                 ) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Icon(Icons.Rounded.VideogameAsset, contentDescription = null, modifier = Modifier.size(32.dp), tint = NeonMagenta)
+                        Icon(
+                            Icons.Rounded.VideogameAsset,
+                            contentDescription = null,
+                            modifier = Modifier.size(32.dp),
+                            tint = NeonMagenta
+                        )
                         Spacer(modifier = Modifier.height(12.dp))
                         NeonText("PLAYED", color = NeonMagenta, fontSize = 12)
                         Spacer(modifier = Modifier.height(8.dp))
                         NeonTitle("$gamesPlayed", fontSize = 20, color = NeonMagenta)
                     }
                 }
-                
+
                 // Won Card
                 Box(
                     modifier = Modifier
@@ -140,7 +135,12 @@ fun ProgressScreen(
                     contentAlignment = Alignment.Center
                 ) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Icon(Icons.Rounded.EmojiEvents, contentDescription = null, modifier = Modifier.size(32.dp), tint = NeonYellow)
+                        Icon(
+                            Icons.Rounded.EmojiEvents,
+                            contentDescription = null,
+                            modifier = Modifier.size(32.dp),
+                            tint = NeonYellow
+                        )
                         Spacer(modifier = Modifier.height(12.dp))
                         NeonText("WON", color = NeonYellow, fontSize = 12)
                         Spacer(modifier = Modifier.height(8.dp))

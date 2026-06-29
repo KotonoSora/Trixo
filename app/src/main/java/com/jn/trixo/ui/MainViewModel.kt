@@ -94,7 +94,8 @@ class MainViewModel(val repository: UserPreferencesRepository) : ViewModel() {
     }
 }
 
-class MainViewModelFactory(private val repository: UserPreferencesRepository) : ViewModelProvider.Factory {
+class MainViewModelFactory(private val repository: UserPreferencesRepository) :
+    ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(MainViewModel::class.java)) {
             @Suppress("UNCHECKED_CAST")

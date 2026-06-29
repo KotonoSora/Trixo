@@ -13,17 +13,13 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.rounded.MonetizationOn
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
@@ -39,13 +35,9 @@ import com.jn.trixo.audio.LocalSoundManager
 import com.jn.trixo.billing.BillingManager
 import com.jn.trixo.ui.MainViewModel
 import com.jn.trixo.ui.components.NeonButton
-import com.jn.trixo.ui.components.NeonIconButton
-import com.jn.trixo.ui.components.NeonText
-import com.jn.trixo.ui.components.NeonTitle
-import com.jn.trixo.ui.theme.NeonCyan
+import com.jn.trixo.ui.components.TrixoTopBar
 import com.jn.trixo.ui.theme.NeonYellow
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CoinShopScreen(
     mainViewModel: MainViewModel,
@@ -72,35 +64,10 @@ fun CoinShopScreen(
 
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = { NeonTitle("COIN SHOP", fontSize = 24) },
-                navigationIcon = {
-                    NeonIconButton(
-                        icon = Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = "Back",
-                        onClick = onNavigateBack,
-                        tint = NeonCyan
-                    )
-                },
-                actions = {
-                    Row(
-                        modifier = Modifier.padding(end = 16.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Icon(
-                            Icons.Rounded.MonetizationOn,
-                            contentDescription = "Coins",
-                            tint = NeonYellow
-                        )
-                        Spacer(modifier = Modifier.width(4.dp))
-                        NeonText(
-                            text = "${userPreferences.coins}",
-                            color = NeonYellow,
-                            fontWeight = FontWeight.Bold
-                        )
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
+            TrixoTopBar(
+                coins = userPreferences.coins,
+                title = "COIN SHOP",
+                onBackClick = onNavigateBack
             )
         },
         containerColor = MaterialTheme.colorScheme.background,
@@ -121,7 +88,11 @@ fun CoinShopScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(vertical = 8.dp),
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(
+                            alpha = 0.5f
+                        )
+                    )
                 ) {
                     Row(
                         modifier = Modifier
