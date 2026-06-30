@@ -66,6 +66,7 @@ fun TrixoApp(
             GameplayScreen(
                 gameViewModel = gameViewModel,
                 mainViewModel = viewModel,
+                dailyChallengesViewModel = dailyChallengesViewModel,
                 onNavigateToResult = {
                     navController.navigate(TrixoDestinations.RESULT) {
                         popUpTo(TrixoDestinations.GAME_MODE) { inclusive = false }

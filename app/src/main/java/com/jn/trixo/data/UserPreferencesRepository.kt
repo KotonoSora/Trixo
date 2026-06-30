@@ -14,14 +14,16 @@ import kotlinx.coroutines.flow.map
 val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "user_preferences")
 
 data class UserPreferences(
-    val coins: Int = 0,
+    val coins: Int = 300,
     val hints: Int = 0,
     val undos: Int = 0,
     val gamesPlayed: Int = 0,
     val gamesWon: Int = 0,
     val soundEnabled: Boolean = true,
     val musicEnabled: Boolean = true,
-    val lastChallengeResetTime: Long = 0L
+    val lastChallengeResetTime: Long = 0L,
+    val challengeProgress: Map<String, Int> = emptyMap(),
+    val challengeClaimed: Map<String, Boolean> = emptyMap()
 )
 
 class UserPreferencesRepository(private val dataStore: DataStore<Preferences>) {
@@ -34,10 +36,12 @@ class UserPreferencesRepository(private val dataStore: DataStore<Preferences>) {
         val SOUND_ENABLED = booleanPreferencesKey("sound_enabled")
         val MUSIC_ENABLED = booleanPreferencesKey("music_enabled")
         val LAST_CHALLENGE_RESET_TIME = longPreferencesKey("last_challenge_reset_time")
+        val CHALLENGE_PROGRESS_PREFIX = "challenge_progress_"
+        val CHALLENGE_CLAIMED_PREFIX = "challenge_claimed_"
     }
 
     val userPreferencesFlow: Flow<UserPreferences> = dataStore.data.map { preferences ->
-        val coins = preferences[PreferencesKeys.COINS] ?: 0
+        val coins = preferences[PreferencesKeys.COINS] ?: 300
         val hints = preferences[PreferencesKeys.HINTS] ?: 0
         val undos = preferences[PreferencesKeys.UNDOS] ?: 0
         val gamesPlayed = preferences[PreferencesKeys.GAMES_PLAYED] ?: 0
@@ -45,6 +49,19 @@ class UserPreferencesRepository(private val dataStore: DataStore<Preferences>) {
         val soundEnabled = preferences[PreferencesKeys.SOUND_ENABLED] ?: true
         val musicEnabled = preferences[PreferencesKeys.MUSIC_ENABLED] ?: true
         val lastResetTime = preferences[PreferencesKeys.LAST_CHALLENGE_RESET_TIME] ?: 0L
+
+        val challengeProgress = mutableMapOf<String, Int>()
+        val challengeClaimed = mutableMapOf<String, Boolean>()
+
+        preferences.asMap().forEach { (key, value) ->
+            if (key.name.startsWith(PreferencesKeys.CHALLENGE_PROGRESS_PREFIX)) {
+                val id = key.name.removePrefix(PreferencesKeys.CHALLENGE_PROGRESS_PREFIX)
+                challengeProgress[id] = value as? Int ?: 0
+            } else if (key.name.startsWith(PreferencesKeys.CHALLENGE_CLAIMED_PREFIX)) {
+                val id = key.name.removePrefix(PreferencesKeys.CHALLENGE_CLAIMED_PREFIX)
+                challengeClaimed[id] = value as? Boolean ?: false
+            }
+        }
 
         UserPreferences(
             coins = coins,
@@ -54,7 +71,9 @@ class UserPreferencesRepository(private val dataStore: DataStore<Preferences>) {
             gamesWon = gamesWon,
             soundEnabled = soundEnabled,
             musicEnabled = musicEnabled,
-            lastChallengeResetTime = lastResetTime
+            lastChallengeResetTime = lastResetTime,
+            challengeProgress = challengeProgress,
+            challengeClaimed = challengeClaimed
         )
     }
 
@@ -66,7 +85,7 @@ class UserPreferencesRepository(private val dataStore: DataStore<Preferences>) {
 
     suspend fun addCoins(amount: Int) {
         dataStore.edit { preferences ->
-            val current = preferences[PreferencesKeys.COINS] ?: 0
+            val current = preferences[PreferencesKeys.COINS] ?: 300
             preferences[PreferencesKeys.COINS] = current + amount
         }
     }
@@ -112,7 +131,7 @@ class UserPreferencesRepository(private val dataStore: DataStore<Preferences>) {
     suspend fun spendCoins(amount: Int): Boolean {
         var spent = false
         dataStore.edit { preferences ->
-            val current = preferences[PreferencesKeys.COINS] ?: 0
+            val current = preferences[PreferencesKeys.COINS] ?: 300
             if (current >= amount) {
                 preferences[PreferencesKeys.COINS] = current - amount
                 spent = true
@@ -150,6 +169,24 @@ class UserPreferencesRepository(private val dataStore: DataStore<Preferences>) {
     suspend fun updateLastChallengeResetTime(time: Long) {
         dataStore.edit { preferences ->
             preferences[PreferencesKeys.LAST_CHALLENGE_RESET_TIME] = time
+            // Also reset all challenge progress
+            val keysToRemove = preferences.asMap().keys.filter {
+                it.name.startsWith(PreferencesKeys.CHALLENGE_PROGRESS_PREFIX) ||
+                        it.name.startsWith(PreferencesKeys.CHALLENGE_CLAIMED_PREFIX)
+            }
+            keysToRemove.forEach { preferences.remove(it) }
+        }
+    }
+
+    suspend fun updateChallengeProgress(id: String, progress: Int) {
+        dataStore.edit { preferences ->
+            preferences[intPreferencesKey(PreferencesKeys.CHALLENGE_PROGRESS_PREFIX + id)] = progress
+        }
+    }
+
+    suspend fun markChallengeClaimed(id: String) {
+        dataStore.edit { preferences ->
+            preferences[booleanPreferencesKey(PreferencesKeys.CHALLENGE_CLAIMED_PREFIX + id)] = true
         }
     }
 }

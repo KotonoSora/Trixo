@@ -63,6 +63,7 @@ import com.jn.trixo.ui.theme.NeonYellow
 fun GameplayScreen(
     gameViewModel: GameViewModel,
     mainViewModel: MainViewModel,
+    dailyChallengesViewModel: com.jn.trixo.ui.viewmodels.DailyChallengesViewModel,
     onNavigateToResult: () -> Unit,
     onNavigateBack: () -> Unit,
     modifier: Modifier = Modifier
@@ -90,6 +91,13 @@ fun GameplayScreen(
                 score = gameState.score,
                 reward = gameState.reward
             )
+
+            // Update daily challenges
+            dailyChallengesViewModel.incrementGamerProgress()
+            if (won) {
+                dailyChallengesViewModel.incrementWinnerProgress()
+            }
+
             onNavigateToResult()
         }
     }
@@ -165,6 +173,7 @@ fun GameplayScreen(
                                     onSuccess = {
                                         soundManager.playTap()
                                         gameViewModel.requestHint()
+                                        dailyChallengesViewModel.incrementStrategistProgress()
                                     },
                                     onFailure = {
                                         soundManager.playError()
@@ -174,6 +183,7 @@ fun GameplayScreen(
                                 mainViewModel.spendCoins(30, onSuccess = {
                                     soundManager.playTap()
                                     gameViewModel.requestHint()
+                                    dailyChallengesViewModel.incrementStrategistProgress()
                                 }, onFailure = {
                                     soundManager.playError()
                                     Toast.makeText(context, "Not enough coins!", Toast.LENGTH_SHORT)
