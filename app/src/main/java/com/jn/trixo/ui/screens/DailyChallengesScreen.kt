@@ -47,6 +47,7 @@ import com.jn.trixo.ui.theme.NeonYellow
 import com.jn.trixo.ui.theme.PressStart2PFontFamily
 import com.jn.trixo.ui.theme.TrixoTheme
 import com.jn.trixo.ui.viewmodels.DailyChallenge
+import com.jn.trixo.ui.viewmodels.DailyChallengesEvent
 import com.jn.trixo.ui.viewmodels.DailyChallengesViewModel
 
 @Composable
@@ -63,9 +64,11 @@ fun DailyChallengesScreen(
         coins = userPrefs.coins,
         challenges = uiState.challenges,
         onClaimReward = { challengeId ->
-            dailyChallengesViewModel.claimReward(challengeId) { coins ->
-                mainViewModel.addCoins(coins)
-            }
+            dailyChallengesViewModel.onEvent(
+                DailyChallengesEvent.ClaimReward(challengeId) { coins ->
+                    mainViewModel.addCoins(coins)
+                }
+            )
         },
         onNavigateBack = onNavigateBack,
         modifier = modifier

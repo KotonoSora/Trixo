@@ -46,6 +46,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.jn.trixo.audio.LocalSoundManager
+import com.jn.trixo.domain.GameEvent
 import com.jn.trixo.domain.GameResult
 import com.jn.trixo.domain.GameState
 import com.jn.trixo.domain.GameViewModel
@@ -58,12 +59,14 @@ import com.jn.trixo.ui.theme.NeonCyan
 import com.jn.trixo.ui.theme.NeonMagenta
 import com.jn.trixo.ui.theme.NeonRed
 import com.jn.trixo.ui.theme.NeonYellow
+import com.jn.trixo.ui.viewmodels.DailyChallengesEvent
+import com.jn.trixo.ui.viewmodels.DailyChallengesViewModel
 
 @Composable
 fun GameplayScreen(
     gameViewModel: GameViewModel,
     mainViewModel: MainViewModel,
-    dailyChallengesViewModel: com.jn.trixo.ui.viewmodels.DailyChallengesViewModel,
+    dailyChallengesViewModel: DailyChallengesViewModel,
     onNavigateToResult: () -> Unit,
     onNavigateBack: () -> Unit,
     modifier: Modifier = Modifier
@@ -93,9 +96,9 @@ fun GameplayScreen(
             )
 
             // Update daily challenges
-            dailyChallengesViewModel.incrementGamerProgress()
+            dailyChallengesViewModel.onEvent(DailyChallengesEvent.IncrementGamerProgress)
             if (won) {
-                dailyChallengesViewModel.incrementWinnerProgress()
+                dailyChallengesViewModel.onEvent(DailyChallengesEvent.IncrementWinnerProgress)
             }
 
             onNavigateToResult()
@@ -150,7 +153,7 @@ fun GameplayScreen(
                         } else if (cell != Player.NONE && gameState.result == GameResult.NONE) {
                             soundManager.playError()
                         }
-                        gameViewModel.playMove(index)
+                        gameViewModel.onEvent(GameEvent.PlayMove(index))
                     }
                 )
             }
@@ -172,8 +175,8 @@ fun GameplayScreen(
                                 mainViewModel.consumeHint(
                                     onSuccess = {
                                         soundManager.playTap()
-                                        gameViewModel.requestHint()
-                                        dailyChallengesViewModel.incrementStrategistProgress()
+                                        gameViewModel.onEvent(GameEvent.RequestHint)
+                                        dailyChallengesViewModel.onEvent(DailyChallengesEvent.IncrementStrategistProgress)
                                     },
                                     onFailure = {
                                         soundManager.playError()
@@ -182,8 +185,8 @@ fun GameplayScreen(
                             } else {
                                 mainViewModel.spendCoins(30, onSuccess = {
                                     soundManager.playTap()
-                                    gameViewModel.requestHint()
-                                    dailyChallengesViewModel.incrementStrategistProgress()
+                                    gameViewModel.onEvent(GameEvent.RequestHint)
+                                    dailyChallengesViewModel.onEvent(DailyChallengesEvent.IncrementStrategistProgress)
                                 }, onFailure = {
                                     soundManager.playError()
                                     Toast.makeText(context, "Not enough coins!", Toast.LENGTH_SHORT)
@@ -201,7 +204,7 @@ fun GameplayScreen(
                                 mainViewModel.consumeUndo(
                                     onSuccess = {
                                         soundManager.playTap()
-                                        gameViewModel.undoMove()
+                                        gameViewModel.onEvent(GameEvent.UndoMove)
                                     },
                                     onFailure = {
                                         soundManager.playError()
@@ -210,7 +213,7 @@ fun GameplayScreen(
                             } else {
                                 mainViewModel.spendCoins(15, onSuccess = {
                                     soundManager.playTap()
-                                    gameViewModel.undoMove()
+                                    gameViewModel.onEvent(GameEvent.UndoMove)
                                 }, onFailure = {
                                     soundManager.playError()
                                     Toast.makeText(context, "Not enough coins!", Toast.LENGTH_SHORT)

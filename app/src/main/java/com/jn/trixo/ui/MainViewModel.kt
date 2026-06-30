@@ -1,23 +1,21 @@
 package com.jn.trixo.ui
 
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import com.jn.trixo.data.UserPreferences
-import com.jn.trixo.data.UserPreferencesRepository
-import com.jn.trixo.data.history.GameHistoryEntry
-import com.jn.trixo.data.history.GameHistoryRepository
+import com.jn.trixo.domain.model.GameHistory
+import com.jn.trixo.domain.model.UserPreferences
+import com.jn.trixo.domain.repository.GameHistoryRepository
+import com.jn.trixo.domain.repository.UserPreferencesRepository
+import com.jn.trixo.domain.usecase.RecordGameFinishedUseCase
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
 
 class MainViewModel(
     val repository: UserPreferencesRepository,
-    private val historyRepository: GameHistoryRepository
+    private val historyRepository: GameHistoryRepository,
+    private val recordGameFinishedUseCase: RecordGameFinishedUseCase
 ) : ViewModel() {
     val userPreferences: StateFlow<UserPreferences> = repository.userPreferencesFlow
         .stateIn(
@@ -26,7 +24,7 @@ class MainViewModel(
             initialValue = UserPreferences()
         )
 
-    val gameHistory: StateFlow<List<GameHistoryEntry>> = historyRepository.allHistory
+    val gameHistory: StateFlow<List<GameHistory>> = historyRepository.allHistory
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
@@ -98,26 +96,7 @@ class MainViewModel(
 
     fun recordGameFinished(won: Boolean, score: Int = 0, reward: Int = 0) {
         viewModelScope.launch {
-            repository.incrementGamesPlayed()
-
-            if (won) {
-                repository.incrementGamesWon()
-            }
-
-            if (reward > 0) {
-                repository.addCoins(reward)
-            }
-
-            // Save to history
-            val sdf = SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault())
-            val currentDateTime = sdf.format(Date())
-            historyRepository.insert(
-                GameHistoryEntry(
-                    dateTime = currentDateTime,
-                    rewardCoins = reward,
-                    score = score
-                )
-            )
+            recordGameFinishedUseCase(won, score, reward)
         }
     }
 
@@ -128,15 +107,3 @@ class MainViewModel(
     }
 }
 
-class MainViewModelFactory(
-    private val repository: UserPreferencesRepository,
-    private val historyRepository: GameHistoryRepository
-) : ViewModelProvider.Factory {
-    override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        if (modelClass.isAssignableFrom(MainViewModel::class.java)) {
-            @Suppress("UNCHECKED_CAST")
-            return MainViewModel(repository, historyRepository) as T
-        }
-        throw IllegalArgumentException("Unknown ViewModel class")
-    }
-}

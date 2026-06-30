@@ -27,6 +27,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.jn.trixo.domain.Difficulty
+import com.jn.trixo.domain.GameEvent
 import com.jn.trixo.domain.GameViewModel
 import com.jn.trixo.ui.MainViewModel
 import com.jn.trixo.ui.components.NeonButton
@@ -91,7 +92,7 @@ fun GameModeScreen(
                     condition = "WIN: 3 IN A ROW",
                     color = NeonGreen,
                     onClick = {
-                        gameViewModel.resetGame(Difficulty.EASY, isPvP = false)
+                        gameViewModel.onEvent(GameEvent.ResetGame(Difficulty.EASY, isPvP = false))
                         onNavigateToGameplay()
                     }
                 )
@@ -103,7 +104,7 @@ fun GameModeScreen(
                     condition = "WIN: 4 IN A ROW",
                     color = NeonCyan,
                     onClick = {
-                        gameViewModel.resetGame(Difficulty.MEDIUM, isPvP = false)
+                        gameViewModel.onEvent(GameEvent.ResetGame(Difficulty.MEDIUM, isPvP = false))
                         onNavigateToGameplay()
                     }
                 )
@@ -115,7 +116,7 @@ fun GameModeScreen(
                     condition = "WIN: 5 IN A ROW",
                     color = NeonYellow,
                     onClick = {
-                        gameViewModel.resetGame(Difficulty.HARD, isPvP = false)
+                        gameViewModel.onEvent(GameEvent.ResetGame(Difficulty.HARD, isPvP = false))
                         onNavigateToGameplay()
                     }
                 )
@@ -127,7 +128,12 @@ fun GameModeScreen(
                     condition = "WIN: 6 IN A ROW",
                     color = NeonMagenta,
                     onClick = {
-                        gameViewModel.resetGame(Difficulty.VERY_HARD, isPvP = false)
+                        gameViewModel.onEvent(
+                            GameEvent.ResetGame(
+                                Difficulty.VERY_HARD,
+                                isPvP = false
+                            )
+                        )
                         onNavigateToGameplay()
                     }
                 )
@@ -159,7 +165,12 @@ fun GameModeScreen(
                     condition = "WIN: 6 IN A ROW",
                     color = NeonMagenta,
                     onClick = {
-                        gameViewModel.resetGame(Difficulty.VERY_HARD, isPvP = true)
+                        gameViewModel.onEvent(
+                            GameEvent.ResetGame(
+                                Difficulty.VERY_HARD,
+                                isPvP = true
+                            )
+                        )
                         onNavigateToGameplay()
                     }
                 )

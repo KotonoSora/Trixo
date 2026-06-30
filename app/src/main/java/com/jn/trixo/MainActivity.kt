@@ -12,14 +12,11 @@ import androidx.compose.runtime.remember
 import androidx.lifecycle.ViewModelProvider
 import com.jn.trixo.audio.LocalSoundManager
 import com.jn.trixo.audio.SoundManager
-import com.jn.trixo.data.TrixoDatabase
-import com.jn.trixo.data.UserPreferencesRepository
-import com.jn.trixo.data.dataStore
-import com.jn.trixo.data.history.GameHistoryRepository
+import com.jn.trixo.di.LocalAppContainer
 import com.jn.trixo.ui.MainViewModel
-import com.jn.trixo.ui.MainViewModelFactory
 import com.jn.trixo.ui.TrixoApp
 import com.jn.trixo.ui.theme.TrixoTheme
+import com.jn.trixo.ui.viewmodels.TrixoViewModelFactory
 
 class MainActivity : ComponentActivity() {
     private lateinit var viewModel: MainViewModel
@@ -28,14 +25,11 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
-        // Initialize DataStore and Repositories
-        val repository = UserPreferencesRepository(applicationContext.dataStore)
-        val database = TrixoDatabase.getDatabase(applicationContext)
-        val historyRepository = GameHistoryRepository(database.gameHistoryDao())
+        val container = (application as TrixoApplication).container
 
         viewModel = ViewModelProvider(
             this,
-            MainViewModelFactory(repository, historyRepository)
+            TrixoViewModelFactory(container)
         )[MainViewModel::class.java]
 
         setContent {
@@ -50,7 +44,10 @@ class MainActivity : ComponentActivity() {
                 }
             }
 
-            CompositionLocalProvider(LocalSoundManager provides soundManager) {
+            CompositionLocalProvider(
+                LocalSoundManager provides soundManager,
+                LocalAppContainer provides container
+            ) {
                 TrixoTheme {
                     TrixoApp(viewModel = viewModel)
                 }
