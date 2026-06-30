@@ -21,25 +21,18 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.History
 import androidx.compose.material.icons.rounded.Lightbulb
-import androidx.compose.material.icons.rounded.MonetizationOn
 import androidx.compose.material.icons.rounded.RadioButtonUnchecked
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -53,26 +46,24 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.jn.trixo.audio.LocalSoundManager
-import com.jn.trixo.domain.Difficulty
 import com.jn.trixo.domain.GameResult
 import com.jn.trixo.domain.GameState
 import com.jn.trixo.domain.GameViewModel
 import com.jn.trixo.domain.Player
 import com.jn.trixo.ui.MainViewModel
 import com.jn.trixo.ui.components.NeonButton
-import com.jn.trixo.ui.components.NeonIconButton
 import com.jn.trixo.ui.components.NeonText
-import com.jn.trixo.ui.components.NeonTitle
+import com.jn.trixo.ui.components.TrixoTopBar
 import com.jn.trixo.ui.theme.NeonCyan
 import com.jn.trixo.ui.theme.NeonMagenta
 import com.jn.trixo.ui.theme.NeonRed
 import com.jn.trixo.ui.theme.NeonYellow
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun GameplayScreen(
     gameViewModel: GameViewModel,
     mainViewModel: MainViewModel,
+    dailyChallengesViewModel: com.jn.trixo.ui.viewmodels.DailyChallengesViewModel,
     onNavigateToResult: () -> Unit,
     onNavigateBack: () -> Unit,
     modifier: Modifier = Modifier
@@ -86,7 +77,7 @@ fun GameplayScreen(
         if (gameState.result != GameResult.NONE) {
             val won = gameState.result == GameResult.X_WINS
             val draw = gameState.result == GameResult.DRAW
-            
+
             if (won) {
                 soundManager.playWin()
             } else if (gameState.result == GameResult.O_WINS) {
@@ -94,9 +85,19 @@ fun GameplayScreen(
             } else if (draw) {
                 soundManager.playTap()
             }
-            
-            mainViewModel.recordGameFinished(won, draw)
-            kotlinx.coroutines.delay(1000)
+
+            mainViewModel.recordGameFinished(
+                won = won,
+                score = gameState.score,
+                reward = gameState.reward
+            )
+
+            // Update daily challenges
+            dailyChallengesViewModel.incrementGamerProgress()
+            if (won) {
+                dailyChallengesViewModel.incrementWinnerProgress()
+            }
+
             onNavigateToResult()
         }
     }
@@ -109,25 +110,10 @@ fun GameplayScreen(
 
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = { NeonTitle("GAME", fontSize = 28) },
-                navigationIcon = {
-                    IconButton(onClick = {
-                        // Let's keep manual playTap if we use IconButton without Neon wrapper here
-                        soundManager.playTap()
-                        onNavigateBack()
-                    }) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Surrender", tint = NeonCyan, modifier = Modifier.size(32.dp))
-                    }
-                },
-                actions = {
-                    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(end = 16.dp)) {
-                        Icon(Icons.Rounded.MonetizationOn, contentDescription = "Coins", tint = NeonYellow, modifier = Modifier.size(24.dp))
-                        Spacer(modifier = Modifier.width(4.dp))
-                        NeonText(text = "${userPreferences.coins}", color = NeonYellow, fontSize = 18, fontWeight = FontWeight.Bold)
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
+            TrixoTopBar(
+                coins = userPreferences.coins,
+                title = "GAME",
+                onBackClick = onNavigateBack
             )
         },
         containerColor = MaterialTheme.colorScheme.background,
@@ -142,7 +128,7 @@ fun GameplayScreen(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Spacer(modifier = Modifier.height(4.dp))
-            
+
             PlayerTurnIndicator(gameState = gameState)
 
             Box(
@@ -157,14 +143,14 @@ fun GameplayScreen(
             ) {
                 TicTacToeBoard(
                     gameState = gameState,
-                    onCellClicked = { index -> 
+                    onCellClicked = { index ->
                         val cell = gameState.board[index]
                         if (cell == Player.NONE && !gameState.isAiTurn && gameState.result == GameResult.NONE) {
                             soundManager.playTap()
                         } else if (cell != Player.NONE && gameState.result == GameResult.NONE) {
                             soundManager.playError()
                         }
-                        gameViewModel.playMove(index) 
+                        gameViewModel.playMove(index)
                     }
                 )
             }
@@ -172,7 +158,9 @@ fun GameplayScreen(
             // Power Ups (Only visible in AI mode)
             if (!gameState.isPvP) {
                 Row(
-                    modifier = Modifier.fillMaxWidth().padding(bottom = 12.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 12.dp),
                     horizontalArrangement = Arrangement.SpaceEvenly
                 ) {
                     PowerUpButton(
@@ -185,6 +173,7 @@ fun GameplayScreen(
                                     onSuccess = {
                                         soundManager.playTap()
                                         gameViewModel.requestHint()
+                                        dailyChallengesViewModel.incrementStrategistProgress()
                                     },
                                     onFailure = {
                                         soundManager.playError()
@@ -194,9 +183,11 @@ fun GameplayScreen(
                                 mainViewModel.spendCoins(30, onSuccess = {
                                     soundManager.playTap()
                                     gameViewModel.requestHint()
+                                    dailyChallengesViewModel.incrementStrategistProgress()
                                 }, onFailure = {
                                     soundManager.playError()
-                                    Toast.makeText(context, "Not enough coins!", Toast.LENGTH_SHORT).show()
+                                    Toast.makeText(context, "Not enough coins!", Toast.LENGTH_SHORT)
+                                        .show()
                                 })
                             }
                         }
@@ -222,7 +213,8 @@ fun GameplayScreen(
                                     gameViewModel.undoMove()
                                 }, onFailure = {
                                     soundManager.playError()
-                                    Toast.makeText(context, "Not enough coins!", Toast.LENGTH_SHORT).show()
+                                    Toast.makeText(context, "Not enough coins!", Toast.LENGTH_SHORT)
+                                        .show()
                                 })
                             }
                         }
@@ -233,7 +225,9 @@ fun GameplayScreen(
             NeonButton(
                 text = "SURRENDER",
                 onClick = onNavigateBack,
-                modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 8.dp),
                 color = NeonRed,
                 height = 64,
                 fontSize = 18
@@ -269,7 +263,7 @@ fun PlayerTurnIndicator(gameState: GameState) {
         gameState.isPvP && gameState.currentPlayer == Player.O -> "PLAYER 2 TURN (O)"
         else -> "YOUR TURN (X)"
     }
-    
+
     val color = if (gameState.currentPlayer == Player.X) NeonCyan else NeonMagenta
 
     Box(
@@ -336,7 +330,7 @@ fun TicTacToeCell(
         isHintCell -> NeonYellow
         else -> Color.White.copy(alpha = 0.2f)
     }
-    
+
     val backgroundColor = when {
         isWinningCell -> NeonYellow.copy(alpha = 0.25f)
         isHintCell -> NeonYellow.copy(alpha = 0.15f)

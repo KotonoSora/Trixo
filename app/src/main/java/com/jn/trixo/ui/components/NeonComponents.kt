@@ -1,9 +1,6 @@
 package com.jn.trixo.ui.components
 
-import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -15,39 +12,21 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.composed
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.jn.trixo.audio.LocalSoundManager
 import com.jn.trixo.ui.theme.NeonCyan
 import com.jn.trixo.ui.theme.PressStart2PFontFamily
 
-/**
- * Custom modifier that automatically plays a tap sound when clicked.
- */
-fun Modifier.neonClickable(
-    enabled: Boolean = true,
-    onClick: () -> Unit
-): Modifier = composed {
-    val soundManager = LocalSoundManager.current
-    this.clickable(
-        enabled = enabled,
-        interactionSource = remember { MutableInteractionSource() },
-        indication = LocalIndication.current,
-        onClick = {
-            soundManager.playTap()
-            onClick()
-        }
-    )
-}
 
 @Composable
 fun NeonButton(
@@ -61,7 +40,7 @@ fun NeonButton(
     fontSize: Int = 16
 ) {
     val soundManager = LocalSoundManager.current
-    
+
     Button(
         onClick = {
             soundManager.playTap()
@@ -122,11 +101,17 @@ fun NeonTitle(
     text: String,
     modifier: Modifier = Modifier,
     color: Color = NeonCyan,
-    fontSize: Int = 36
+    fontSize: Int = 36,
+    textAlign: TextAlign = TextAlign.Start,
+    maxLines: Int = Int.MAX_VALUE,
+    overflow: TextOverflow = TextOverflow.Clip
 ) {
     Text(
         text = text,
         modifier = modifier,
+        textAlign = textAlign,
+        maxLines = maxLines,
+        overflow = overflow,
         style = TextStyle(
             fontFamily = PressStart2PFontFamily,
             color = color,
@@ -146,7 +131,10 @@ fun NeonText(
     modifier: Modifier = Modifier,
     color: Color = Color.White,
     fontSize: Int = 16,
-    fontWeight: FontWeight = FontWeight.Normal
+    fontWeight: FontWeight = FontWeight.Normal,
+    textAlign: TextAlign = TextAlign.Start,
+    maxLines: Int = Int.MAX_VALUE,
+    overflow: TextOverflow = TextOverflow.Clip
 ) {
     Text(
         text = text,
@@ -154,6 +142,9 @@ fun NeonText(
         color = color,
         fontSize = fontSize.sp,
         fontWeight = fontWeight,
-        fontFamily = PressStart2PFontFamily
+        fontFamily = PressStart2PFontFamily,
+        textAlign = textAlign,
+        maxLines = maxLines,
+        overflow = overflow
     )
 }

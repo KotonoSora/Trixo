@@ -13,55 +13,45 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.rounded.Group
 import androidx.compose.material.icons.rounded.PrecisionManufacturing
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.jn.trixo.domain.Difficulty
 import com.jn.trixo.domain.GameViewModel
+import com.jn.trixo.ui.MainViewModel
 import com.jn.trixo.ui.components.NeonButton
-import com.jn.trixo.ui.components.NeonIconButton
 import com.jn.trixo.ui.components.NeonText
-import com.jn.trixo.ui.components.NeonTitle
+import com.jn.trixo.ui.components.TrixoTopBar
 import com.jn.trixo.ui.theme.NeonCyan
 import com.jn.trixo.ui.theme.NeonGreen
 import com.jn.trixo.ui.theme.NeonMagenta
 import com.jn.trixo.ui.theme.NeonYellow
-import com.jn.trixo.ui.theme.TrixoTheme
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun GameModeScreen(
     gameViewModel: GameViewModel,
+    mainViewModel: MainViewModel,
     onNavigateBack: () -> Unit,
     onNavigateToGameplay: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val userPreferences by mainViewModel.userPreferences.collectAsState()
+
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = { NeonTitle("SELECT MODE", fontSize = 24) },
-                navigationIcon = {
-                    NeonIconButton(
-                        icon = Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = "Back",
-                        onClick = onNavigateBack,
-                        tint = NeonCyan
-                    )
-                },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
+            TrixoTopBar(
+                coins = userPreferences.coins,
+                onBackClick = onNavigateBack
             )
         },
         containerColor = MaterialTheme.colorScheme.background,
@@ -76,16 +66,26 @@ fun GameModeScreen(
             verticalArrangement = Arrangement.spacedBy(24.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            
+
             // Section Title: VS AI
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(Icons.Rounded.PrecisionManufacturing, contentDescription = null, tint = NeonCyan, modifier = Modifier.size(24.dp))
+                    Icon(
+                        Icons.Rounded.PrecisionManufacturing,
+                        contentDescription = null,
+                        tint = NeonCyan,
+                        modifier = Modifier.size(24.dp)
+                    )
                     Spacer(modifier = Modifier.width(8.dp))
-                    NeonText(text = "VS AI (WITH POWERS)", color = NeonCyan, fontSize = 16, fontWeight = FontWeight.Bold)
+                    NeonText(
+                        text = "VS AI (WITH POWERS)",
+                        color = NeonCyan,
+                        fontSize = 16,
+                        fontWeight = FontWeight.Bold
+                    )
                 }
                 Spacer(modifier = Modifier.height(16.dp))
-                
+
                 DifficultyButton(
                     text = "EASY (3x3)",
                     condition = "WIN: 3 IN A ROW",
@@ -95,9 +95,9 @@ fun GameModeScreen(
                         onNavigateToGameplay()
                     }
                 )
-                
+
                 Spacer(modifier = Modifier.height(12.dp))
-                
+
                 DifficultyButton(
                     text = "MEDIUM (9x9)",
                     condition = "WIN: 4 IN A ROW",
@@ -107,9 +107,9 @@ fun GameModeScreen(
                         onNavigateToGameplay()
                     }
                 )
-                
+
                 Spacer(modifier = Modifier.height(12.dp))
-                
+
                 DifficultyButton(
                     text = "HARD (12x12)",
                     condition = "WIN: 5 IN A ROW",
@@ -119,9 +119,9 @@ fun GameModeScreen(
                         onNavigateToGameplay()
                     }
                 )
-                
+
                 Spacer(modifier = Modifier.height(12.dp))
-                
+
                 DifficultyButton(
                     text = "INSANE (15x15)",
                     condition = "WIN: 6 IN A ROW",
@@ -138,12 +138,22 @@ fun GameModeScreen(
             // Section Title: LOCAL PvP
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(Icons.Rounded.Group, contentDescription = null, tint = NeonMagenta, modifier = Modifier.size(24.dp))
+                    Icon(
+                        Icons.Rounded.Group,
+                        contentDescription = null,
+                        tint = NeonMagenta,
+                        modifier = Modifier.size(24.dp)
+                    )
                     Spacer(modifier = Modifier.width(8.dp))
-                    NeonText(text = "LOCAL 2 PLAYERS (NO POWERS)", color = NeonMagenta, fontSize = 16, fontWeight = FontWeight.Bold)
+                    NeonText(
+                        text = "LOCAL 2 PLAYERS (NO POWERS)",
+                        color = NeonMagenta,
+                        fontSize = 16,
+                        fontWeight = FontWeight.Bold
+                    )
                 }
                 Spacer(modifier = Modifier.height(16.dp))
-                
+
                 DifficultyButton(
                     text = "LOCAL BATTLE (15x15)",
                     condition = "WIN: 6 IN A ROW",
@@ -154,7 +164,7 @@ fun GameModeScreen(
                     }
                 )
             }
-            
+
             Spacer(modifier = Modifier.height(24.dp))
         }
     }
@@ -177,14 +187,3 @@ fun DifficultyButton(
     )
 }
 
-@Preview(showBackground = true)
-@Composable
-fun GameModeScreenPreview() {
-    TrixoTheme {
-        GameModeScreen(
-            gameViewModel = GameViewModel(),
-            onNavigateBack = {},
-            onNavigateToGameplay = {}
-        )
-    }
-}

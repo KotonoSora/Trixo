@@ -12,8 +12,10 @@ import androidx.compose.runtime.remember
 import androidx.lifecycle.ViewModelProvider
 import com.jn.trixo.audio.LocalSoundManager
 import com.jn.trixo.audio.SoundManager
+import com.jn.trixo.data.TrixoDatabase
 import com.jn.trixo.data.UserPreferencesRepository
 import com.jn.trixo.data.dataStore
+import com.jn.trixo.data.history.GameHistoryRepository
 import com.jn.trixo.ui.MainViewModel
 import com.jn.trixo.ui.MainViewModelFactory
 import com.jn.trixo.ui.TrixoApp
@@ -25,18 +27,21 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-        
-        // Initialize DataStore and Repository
+
+        // Initialize DataStore and Repositories
         val repository = UserPreferencesRepository(applicationContext.dataStore)
+        val database = TrixoDatabase.getDatabase(applicationContext)
+        val historyRepository = GameHistoryRepository(database.gameHistoryDao())
+
         viewModel = ViewModelProvider(
             this,
-            MainViewModelFactory(repository)
+            MainViewModelFactory(repository, historyRepository)
         )[MainViewModel::class.java]
 
         setContent {
             val soundManager = remember { SoundManager(applicationContext) }
             val userPrefs by viewModel.userPreferences.collectAsState()
-            
+
             soundManager.soundEnabled = userPrefs.soundEnabled
 
             DisposableEffect(Unit) {
