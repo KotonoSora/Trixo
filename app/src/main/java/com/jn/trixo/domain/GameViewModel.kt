@@ -8,6 +8,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlin.time.Duration.Companion.milliseconds
 
 enum class Player { X, O, NONE }
 enum class GameResult { NONE, X_WINS, O_WINS, DRAW }
@@ -27,7 +28,9 @@ data class GameState(
     val winningLine: List<Int>? = null,
     val hintIndex: Int? = null,
     val history: List<List<Player>> = emptyList(),
-    val isPvP: Boolean = false
+    val isPvP: Boolean = false,
+    val score: Int = 0,
+    val reward: Int = 0
 ) {
     val boardSize get() = difficulty.size
     val winRequirement get() = difficulty.winReq
@@ -56,12 +59,15 @@ class GameViewModel : ViewModel() {
         val (result, winLine) = getFullBoardResult(newBoard, state.boardSize, state.winRequirement)
 
         if (result != GameResult.NONE) {
+            val (score, reward) = calculateScoreAndReward(state, result, newBoard)
             _gameState.value = state.copy(
                 board = newBoard,
                 result = result,
                 winningLine = winLine,
                 hintIndex = null,
-                history = currentHistory
+                history = currentHistory,
+                score = score,
+                reward = reward
             )
         } else {
             val nextPlayer = if (state.currentPlayer == Player.X) Player.O else Player.X
@@ -111,7 +117,7 @@ class GameViewModel : ViewModel() {
     private fun playAIMove(sessionId: Long) {
         aiMoveJob?.cancel()
         aiMoveJob = viewModelScope.launch {
-            delay(600) // Simulate "thinking" for a better UX
+            delay(300.milliseconds) // Simulate "thinking" for a better UX
             val state = _gameState.value
             if (sessionId != gameSessionId) return@launch
             if (state.result != GameResult.NONE || !state.isAiTurn || state.currentPlayer != Player.O) return@launch
@@ -126,15 +132,49 @@ class GameViewModel : ViewModel() {
                     state.boardSize,
                     state.winRequirement
                 )
+                val (score, reward) = calculateScoreAndReward(state, result, newBoard)
                 _gameState.value = state.copy(
                     board = newBoard,
                     currentPlayer = Player.X,
                     result = result,
                     isAiTurn = false,
-                    winningLine = winLine
+                    winningLine = winLine,
+                    score = score,
+                    reward = reward
                 )
             }
         }
+    }
+
+    private fun calculateScoreAndReward(
+        state: GameState,
+        result: GameResult,
+        board: List<Player>
+    ): Pair<Int, Int> {
+        if (result == GameResult.NONE) return 0 to 0
+
+        val difficultyMultiplier = when (state.difficulty) {
+            Difficulty.EASY -> 1
+            Difficulty.MEDIUM -> 2
+            Difficulty.HARD -> 3
+            Difficulty.VERY_HARD -> 5
+        }
+
+        val emptyCells = board.count { it == Player.NONE }
+
+        val score = when (result) {
+            GameResult.X_WINS -> (1000 + (emptyCells * 10)) * difficultyMultiplier
+            GameResult.DRAW -> 500 * difficultyMultiplier
+            else -> 100 * difficultyMultiplier
+        }
+
+        val reward = when (result) {
+            GameResult.X_WINS -> 50 * difficultyMultiplier
+            GameResult.DRAW -> 10 * difficultyMultiplier
+            else -> 0
+        }
+
+        return score to reward
     }
 
     private fun findBestMove(board: List<Player>, aiPlayer: Player, size: Int, winReq: Int): Int {
@@ -288,6 +328,5 @@ class GameViewModel : ViewModel() {
 
     override fun onCleared() {
         aiMoveJob?.cancel()
-        super.onCleared()
     }
 }

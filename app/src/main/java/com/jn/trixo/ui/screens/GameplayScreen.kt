@@ -85,8 +85,11 @@ fun GameplayScreen(
                 soundManager.playTap()
             }
 
-            mainViewModel.recordGameFinished(won, draw)
-            kotlinx.coroutines.delay(1000)
+            mainViewModel.recordGameFinished(
+                won = won,
+                score = gameState.score,
+                reward = gameState.reward
+            )
             onNavigateToResult()
         }
     }

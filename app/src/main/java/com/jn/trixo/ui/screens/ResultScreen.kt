@@ -1,8 +1,6 @@
 package com.jn.trixo.ui.screens
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.scaleIn
+
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -106,40 +104,68 @@ fun ResultScreenContent(
                 .padding(innerPadding)
                 .fillMaxSize()
                 .padding(horizontal = 32.dp, vertical = 24.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center,
         ) {
-            Spacer(modifier = Modifier.weight(1f))
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                when (gameState.result) {
+                    GameResult.X_WINS -> {
+                        // Fixed NoSuchMethodError by using explicit named arguments and refreshing the call site signature
+                        NeonTitle(
+                            text = "VICTORY!",
+                            color = NeonGreen,
+                            fontSize = 40,
+                            textAlign = TextAlign.Center
+                        )
+                        Spacer(modifier = Modifier.height(16.dp))
+                        NeonText(
+                            text = "Score: ${gameState.score}",
+                            color = Color.White,
+                            fontSize = 20
+                        )
+                        Spacer(modifier = Modifier.height(16.dp))
+                        RewardDisplay(amount = gameState.reward, iconSize = 32, fontSize = 36)
+                    }
 
-            AnimatedVisibility(
-                visible = true,
-                enter = scaleIn(animationSpec = tween(500))
-            ) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    when (gameState.result) {
-                        GameResult.X_WINS -> {
-                            NeonTitle("VICTORY!", color = NeonGreen, fontSize = 36)
-                            Spacer(modifier = Modifier.height(24.dp))
-                            RewardDisplay(amount = 50, iconSize = 32, fontSize = 36)
-                        }
+                    GameResult.O_WINS -> {
+                        NeonTitle(
+                            text = "GAME OVER",
+                            color = NeonRed,
+                            fontSize = 48,
+                            textAlign = TextAlign.Center
+                        )
+                        Spacer(modifier = Modifier.height(16.dp))
+                        NeonText(
+                            text = "Score: ${gameState.score}",
+                            color = Color.White,
+                            fontSize = 20
+                        )
+                    }
 
-                        GameResult.O_WINS -> {
-                            NeonTitle("GAME OVER", color = NeonRed, fontSize = 48, textAlign = TextAlign.Center)
-                        }
+                    GameResult.DRAW -> {
+                        NeonTitle(
+                            text = "DRAW GAME",
+                            color = NeonMagenta,
+                            fontSize = 48,
+                            textAlign = TextAlign.Center
+                        )
+                        Spacer(modifier = Modifier.height(16.dp))
+                        NeonText(
+                            text = "Score: ${gameState.score}",
+                            color = Color.White,
+                            fontSize = 20
+                        )
+                        Spacer(modifier = Modifier.height(16.dp))
+                        RewardDisplay(amount = gameState.reward, iconSize = 28, fontSize = 28)
+                    }
 
-                        GameResult.DRAW -> {
-                            NeonTitle("DRAW GAME", color = NeonMagenta, fontSize = 36)
-                            Spacer(modifier = Modifier.height(24.dp))
-                            RewardDisplay(amount = 10, iconSize = 28, fontSize = 28)
-                        }
-
-                        else -> {
-                            NeonTitle("ABORTED", color = Color.Gray, fontSize = 36)
-                        }
+                    else -> {
+                        NeonTitle(text = "ABORTED", color = Color.Gray, fontSize = 36)
                     }
                 }
             }
 
-            Spacer(modifier = Modifier.weight(1f))
+            Spacer(modifier = Modifier.height(48.dp))
 
             Column(
                 modifier = Modifier.fillMaxWidth(),

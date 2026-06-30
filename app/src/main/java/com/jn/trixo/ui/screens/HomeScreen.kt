@@ -9,6 +9,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.EmojiEvents
+import androidx.compose.material.icons.rounded.Event
 import androidx.compose.material.icons.rounded.PlayArrow
 import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.material.icons.rounded.Timeline
@@ -24,6 +26,8 @@ import com.jn.trixo.ui.MainViewModel
 import com.jn.trixo.ui.components.NeonButton
 import com.jn.trixo.ui.components.NeonTitle
 import com.jn.trixo.ui.components.TrixoTopBar
+import com.jn.trixo.ui.theme.NeonBlue
+import com.jn.trixo.ui.theme.NeonGreen
 import com.jn.trixo.ui.theme.NeonMagenta
 import com.jn.trixo.ui.theme.NeonYellow
 
@@ -34,6 +38,8 @@ fun HomeScreen(
     onNavigateToCoinShop: () -> Unit,
     onNavigateToProgress: () -> Unit,
     onNavigateToSettings: () -> Unit,
+    onNavigateToDailyChallenges: () -> Unit,
+    onNavigateToLeaderboard: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val userPrefs by viewModel.userPreferences.collectAsState()
@@ -71,7 +77,7 @@ fun HomeScreen(
             // Menu Options
             Column(
                 modifier = Modifier.fillMaxWidth(),
-                verticalArrangement = Arrangement.spacedBy(16.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 NeonButton(
@@ -79,8 +85,28 @@ fun HomeScreen(
                     onClick = onNavigateToGameMode,
                     modifier = Modifier.fillMaxWidth(),
                     icon = Icons.Rounded.PlayArrow,
-                    height = 72,
-                    fontSize = 18
+                    height = 64,
+                    fontSize = 16
+                )
+
+                NeonButton(
+                    text = "CHALLENGES",
+                    onClick = onNavigateToDailyChallenges,
+                    modifier = Modifier.fillMaxWidth(),
+                    color = NeonGreen,
+                    icon = Icons.Rounded.Event,
+                    height = 64,
+                    fontSize = 16
+                )
+
+                NeonButton(
+                    text = "LEADERBOARD",
+                    onClick = onNavigateToLeaderboard,
+                    modifier = Modifier.fillMaxWidth(),
+                    color = NeonYellow,
+                    icon = Icons.Rounded.EmojiEvents,
+                    height = 64,
+                    fontSize = 16
                 )
 
                 NeonButton(
@@ -89,18 +115,18 @@ fun HomeScreen(
                     modifier = Modifier.fillMaxWidth(),
                     color = NeonMagenta,
                     icon = Icons.Rounded.Timeline,
-                    height = 72,
-                    fontSize = 18
+                    height = 64,
+                    fontSize = 16
                 )
 
                 NeonButton(
                     text = "SETTINGS",
                     onClick = onNavigateToSettings,
                     modifier = Modifier.fillMaxWidth(),
-                    color = NeonYellow,
+                    color = NeonBlue,
                     icon = Icons.Rounded.Settings,
-                    height = 72,
-                    fontSize = 18
+                    height = 64,
+                    fontSize = 16
                 )
             }
 

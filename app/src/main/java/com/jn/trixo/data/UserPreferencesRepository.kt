@@ -6,6 +6,7 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
+import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -19,7 +20,8 @@ data class UserPreferences(
     val gamesPlayed: Int = 0,
     val gamesWon: Int = 0,
     val soundEnabled: Boolean = true,
-    val musicEnabled: Boolean = true
+    val musicEnabled: Boolean = true,
+    val lastChallengeResetTime: Long = 0L
 )
 
 class UserPreferencesRepository(private val dataStore: DataStore<Preferences>) {
@@ -31,6 +33,7 @@ class UserPreferencesRepository(private val dataStore: DataStore<Preferences>) {
         val GAMES_WON = intPreferencesKey("games_won")
         val SOUND_ENABLED = booleanPreferencesKey("sound_enabled")
         val MUSIC_ENABLED = booleanPreferencesKey("music_enabled")
+        val LAST_CHALLENGE_RESET_TIME = longPreferencesKey("last_challenge_reset_time")
     }
 
     val userPreferencesFlow: Flow<UserPreferences> = dataStore.data.map { preferences ->
@@ -41,6 +44,7 @@ class UserPreferencesRepository(private val dataStore: DataStore<Preferences>) {
         val gamesWon = preferences[PreferencesKeys.GAMES_WON] ?: 0
         val soundEnabled = preferences[PreferencesKeys.SOUND_ENABLED] ?: true
         val musicEnabled = preferences[PreferencesKeys.MUSIC_ENABLED] ?: true
+        val lastResetTime = preferences[PreferencesKeys.LAST_CHALLENGE_RESET_TIME] ?: 0L
 
         UserPreferences(
             coins = coins,
@@ -49,7 +53,8 @@ class UserPreferencesRepository(private val dataStore: DataStore<Preferences>) {
             gamesPlayed = gamesPlayed,
             gamesWon = gamesWon,
             soundEnabled = soundEnabled,
-            musicEnabled = musicEnabled
+            musicEnabled = musicEnabled,
+            lastChallengeResetTime = lastResetTime
         )
     }
 
@@ -139,6 +144,12 @@ class UserPreferencesRepository(private val dataStore: DataStore<Preferences>) {
     suspend fun setMusicEnabled(enabled: Boolean) {
         dataStore.edit { preferences ->
             preferences[PreferencesKeys.MUSIC_ENABLED] = enabled
+        }
+    }
+
+    suspend fun updateLastChallengeResetTime(time: Long) {
+        dataStore.edit { preferences ->
+            preferences[PreferencesKeys.LAST_CHALLENGE_RESET_TIME] = time
         }
     }
 }

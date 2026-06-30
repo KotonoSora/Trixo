@@ -10,12 +10,15 @@ import androidx.navigation.compose.rememberNavController
 import com.jn.trixo.domain.GameViewModel
 import com.jn.trixo.ui.navigation.TrixoDestinations
 import com.jn.trixo.ui.screens.CoinShopScreen
+import com.jn.trixo.ui.screens.DailyChallengesScreen
 import com.jn.trixo.ui.screens.GameModeScreen
 import com.jn.trixo.ui.screens.GameplayScreen
 import com.jn.trixo.ui.screens.HomeScreen
+import com.jn.trixo.ui.screens.LeaderboardScreen
 import com.jn.trixo.ui.screens.ProgressScreen
 import com.jn.trixo.ui.screens.ResultScreen
 import com.jn.trixo.ui.screens.SettingsScreen
+import com.jn.trixo.ui.viewmodels.DailyChallengesViewModel
 
 @Composable
 fun TrixoApp(
@@ -25,6 +28,13 @@ fun TrixoApp(
 ) {
     // Shared GameViewModel scoped to TrixoApp lifecycle
     val gameViewModel: GameViewModel = viewModel()
+    val dailyChallengesViewModel: DailyChallengesViewModel = viewModel(
+        factory = object : androidx.lifecycle.ViewModelProvider.Factory {
+            override fun <T : androidx.lifecycle.ViewModel> create(modelClass: Class<T>): T {
+                return DailyChallengesViewModel(viewModel.repository) as T
+            }
+        }
+    )
 
     NavHost(
         navController = navController,
@@ -37,7 +47,9 @@ fun TrixoApp(
                 onNavigateToGameMode = { navController.navigate(TrixoDestinations.GAME_MODE) },
                 onNavigateToCoinShop = { navController.navigate(TrixoDestinations.COIN_SHOP) },
                 onNavigateToProgress = { navController.navigate(TrixoDestinations.PROGRESS) },
-                onNavigateToSettings = { navController.navigate(TrixoDestinations.SETTINGS) }
+                onNavigateToSettings = { navController.navigate(TrixoDestinations.SETTINGS) },
+                onNavigateToDailyChallenges = { navController.navigate(TrixoDestinations.DAILY_CHALLENGES) },
+                onNavigateToLeaderboard = { navController.navigate(TrixoDestinations.LEADERBOARD) }
             )
         }
 
@@ -102,6 +114,21 @@ fun TrixoApp(
 
         composable(TrixoDestinations.SETTINGS) {
             SettingsScreen(
+                mainViewModel = viewModel,
+                onNavigateBack = { navController.popBackStack() }
+            )
+        }
+
+        composable(TrixoDestinations.DAILY_CHALLENGES) {
+            DailyChallengesScreen(
+                mainViewModel = viewModel,
+                dailyChallengesViewModel = dailyChallengesViewModel,
+                onNavigateBack = { navController.popBackStack() }
+            )
+        }
+
+        composable(TrixoDestinations.LEADERBOARD) {
+            LeaderboardScreen(
                 mainViewModel = viewModel,
                 onNavigateBack = { navController.popBackStack() }
             )

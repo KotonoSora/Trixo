@@ -8,4 +8,6 @@ object TrixoDestinations {
     const val COIN_SHOP = "coin_shop"
     const val PROGRESS = "progress"
     const val SETTINGS = "settings"
+    const val DAILY_CHALLENGES = "daily_challenges"
+    const val LEADERBOARD = "leaderboard"
 }

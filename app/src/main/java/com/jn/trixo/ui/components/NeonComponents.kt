@@ -20,6 +20,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.jn.trixo.audio.LocalSoundManager
@@ -102,10 +103,15 @@ fun NeonTitle(
     color: Color = NeonCyan,
     fontSize: Int = 36,
     textAlign: TextAlign = TextAlign.Start,
+    maxLines: Int = Int.MAX_VALUE,
+    overflow: TextOverflow = TextOverflow.Clip
 ) {
     Text(
         text = text,
         modifier = modifier,
+        textAlign = textAlign,
+        maxLines = maxLines,
+        overflow = overflow,
         style = TextStyle(
             fontFamily = PressStart2PFontFamily,
             color = color,
@@ -114,8 +120,7 @@ fun NeonTitle(
             shadow = Shadow(
                 color = color,
                 blurRadius = 16f
-            ),
-            textAlign = textAlign,
+            )
         )
     )
 }
@@ -126,7 +131,10 @@ fun NeonText(
     modifier: Modifier = Modifier,
     color: Color = Color.White,
     fontSize: Int = 16,
-    fontWeight: FontWeight = FontWeight.Normal
+    fontWeight: FontWeight = FontWeight.Normal,
+    textAlign: TextAlign = TextAlign.Start,
+    maxLines: Int = Int.MAX_VALUE,
+    overflow: TextOverflow = TextOverflow.Clip
 ) {
     Text(
         text = text,
@@ -134,6 +142,9 @@ fun NeonText(
         color = color,
         fontSize = fontSize.sp,
         fontWeight = fontWeight,
-        fontFamily = PressStart2PFontFamily
+        fontFamily = PressStart2PFontFamily,
+        textAlign = textAlign,
+        maxLines = maxLines,
+        overflow = overflow
     )
 }
