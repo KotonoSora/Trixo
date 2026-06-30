@@ -3,7 +3,7 @@ package com.jn.trixo.domain.usecase
 import com.jn.trixo.domain.Difficulty
 import com.jn.trixo.domain.GameResult
 import com.jn.trixo.domain.Player
-import kotlin.math.max
+import kotlin.math.min
 
 class CalculateScoreUseCase {
     operator fun invoke(
@@ -23,14 +23,14 @@ class CalculateScoreUseCase {
         val emptyCells = board.count { it == Player.NONE }
 
         val score = when (result) {
-            GameResult.X_WINS -> (100 + (emptyCells * 10)) * difficultyMultiplier
-            GameResult.DRAW -> 50 * difficultyMultiplier
-            else -> 10 * difficultyMultiplier
+            GameResult.X_WINS -> (10 + (emptyCells * 10)) * difficultyMultiplier
+            GameResult.DRAW -> 5 * difficultyMultiplier
+            else -> 1 * difficultyMultiplier
         }
 
         val reward = when (result) {
-            GameResult.X_WINS -> max(50 * difficultyMultiplier, 50)
-            GameResult.DRAW -> max(10 * difficultyMultiplier, 10)
+            GameResult.X_WINS -> min(10 * difficultyMultiplier, 50)
+            GameResult.DRAW -> min(5 * difficultyMultiplier, 25)
             else -> 0
         }
 
