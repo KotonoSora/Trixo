@@ -24,7 +24,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.jn.trixo.data.history.GameHistoryEntry
+import com.jn.trixo.domain.model.GameHistory
 import com.jn.trixo.ui.MainViewModel
 import com.jn.trixo.ui.components.NeonText
 import com.jn.trixo.ui.components.NeonTitle
@@ -53,7 +53,7 @@ fun LeaderboardScreen(
 @Composable
 fun LeaderboardScreenContent(
     coins: Int,
-    history: List<GameHistoryEntry>,
+    history: List<GameHistory>,
     onNavigateBack: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -122,7 +122,7 @@ fun LeaderboardScreenContent(
 }
 
 @Composable
-fun LeaderboardItem(entry: GameHistoryEntry) {
+fun LeaderboardItem(entry: GameHistory) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -180,9 +180,9 @@ fun LeaderboardScreenPreview() {
         LeaderboardScreenContent(
             coins = 250,
             history = listOf(
-                GameHistoryEntry(1, "2023-10-27 14:30", 50, 1250),
-                GameHistoryEntry(2, "2023-10-26 10:15", 30, 1100),
-                GameHistoryEntry(3, "2023-10-25 18:45", 25, 950)
+                GameHistory(1, "2023-10-27 14:30", 50, 1250),
+                GameHistory(2, "2023-10-26 10:15", 30, 1100),
+                GameHistory(3, "2023-10-25 18:45", 25, 950)
             ),
             onNavigateBack = {}
         )

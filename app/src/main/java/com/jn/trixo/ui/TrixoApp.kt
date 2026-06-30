@@ -1,12 +1,15 @@
 package com.jn.trixo.ui
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.jn.trixo.di.LocalAppContainer
+import com.jn.trixo.domain.GameEvent
 import com.jn.trixo.domain.GameViewModel
 import com.jn.trixo.ui.navigation.TrixoDestinations
 import com.jn.trixo.ui.screens.CoinShopScreen
@@ -19,6 +22,7 @@ import com.jn.trixo.ui.screens.ProgressScreen
 import com.jn.trixo.ui.screens.ResultScreen
 import com.jn.trixo.ui.screens.SettingsScreen
 import com.jn.trixo.ui.viewmodels.DailyChallengesViewModel
+import com.jn.trixo.ui.viewmodels.TrixoViewModelFactory
 
 @Composable
 fun TrixoApp(
@@ -26,15 +30,12 @@ fun TrixoApp(
     modifier: Modifier = Modifier,
     navController: NavHostController = rememberNavController()
 ) {
+    val container = LocalAppContainer.current
+    val factory = remember(container) { TrixoViewModelFactory(container) }
+
     // Shared GameViewModel scoped to TrixoApp lifecycle
-    val gameViewModel: GameViewModel = viewModel()
-    val dailyChallengesViewModel: DailyChallengesViewModel = viewModel(
-        factory = object : androidx.lifecycle.ViewModelProvider.Factory {
-            override fun <T : androidx.lifecycle.ViewModel> create(modelClass: Class<T>): T {
-                return DailyChallengesViewModel(viewModel.repository) as T
-            }
-        }
-    )
+    val gameViewModel: GameViewModel = viewModel(factory = factory)
+    val dailyChallengesViewModel: DailyChallengesViewModel = viewModel(factory = factory)
 
     NavHost(
         navController = navController,
@@ -91,7 +92,7 @@ fun TrixoApp(
                     }
                 },
                 onNavigateToNextLevel = { nextDifficulty ->
-                    gameViewModel.resetGame(nextDifficulty, isPvP = false)
+                    gameViewModel.onEvent(GameEvent.ResetGame(nextDifficulty, isPvP = false))
                     navController.navigate(TrixoDestinations.GAMEPLAY) {
                         popUpTo(TrixoDestinations.HOME) { inclusive = false }
                     }

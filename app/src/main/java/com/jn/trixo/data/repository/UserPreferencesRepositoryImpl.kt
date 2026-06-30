@@ -1,32 +1,18 @@
-package com.jn.trixo.data
+package com.jn.trixo.data.repository
 
-import android.content.Context
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.longPreferencesKey
-import androidx.datastore.preferences.preferencesDataStore
+import com.jn.trixo.domain.model.UserPreferences
+import com.jn.trixo.domain.repository.UserPreferencesRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
-val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "user_preferences")
-
-data class UserPreferences(
-    val coins: Int = 300,
-    val hints: Int = 0,
-    val undos: Int = 0,
-    val gamesPlayed: Int = 0,
-    val gamesWon: Int = 0,
-    val soundEnabled: Boolean = true,
-    val musicEnabled: Boolean = true,
-    val lastChallengeResetTime: Long = 0L,
-    val challengeProgress: Map<String, Int> = emptyMap(),
-    val challengeClaimed: Map<String, Boolean> = emptyMap()
-)
-
-class UserPreferencesRepository(private val dataStore: DataStore<Preferences>) {
+class UserPreferencesRepositoryImpl(private val dataStore: DataStore<Preferences>) :
+    UserPreferencesRepository {
     private object PreferencesKeys {
         val COINS = intPreferencesKey("coins")
         val HINTS = intPreferencesKey("hints")
@@ -40,7 +26,7 @@ class UserPreferencesRepository(private val dataStore: DataStore<Preferences>) {
         val CHALLENGE_CLAIMED_PREFIX = "challenge_claimed_"
     }
 
-    val userPreferencesFlow: Flow<UserPreferences> = dataStore.data.map { preferences ->
+    override val userPreferencesFlow: Flow<UserPreferences> = dataStore.data.map { preferences ->
         val coins = preferences[PreferencesKeys.COINS] ?: 300
         val hints = preferences[PreferencesKeys.HINTS] ?: 0
         val undos = preferences[PreferencesKeys.UNDOS] ?: 0
@@ -77,27 +63,27 @@ class UserPreferencesRepository(private val dataStore: DataStore<Preferences>) {
         )
     }
 
-    suspend fun updateCoins(coins: Int) {
+    override suspend fun updateCoins(coins: Int) {
         dataStore.edit { preferences ->
             preferences[PreferencesKeys.COINS] = coins
         }
     }
 
-    suspend fun addCoins(amount: Int) {
+    override suspend fun addCoins(amount: Int) {
         dataStore.edit { preferences ->
             val current = preferences[PreferencesKeys.COINS] ?: 300
             preferences[PreferencesKeys.COINS] = current + amount
         }
     }
 
-    suspend fun addHints(amount: Int) {
+    override suspend fun addHints(amount: Int) {
         dataStore.edit { preferences ->
             val current = preferences[PreferencesKeys.HINTS] ?: 0
             preferences[PreferencesKeys.HINTS] = current + amount
         }
     }
 
-    suspend fun consumeHint(): Boolean {
+    override suspend fun consumeHint(): Boolean {
         var consumed = false
         dataStore.edit { preferences ->
             val current = preferences[PreferencesKeys.HINTS] ?: 0
@@ -109,14 +95,14 @@ class UserPreferencesRepository(private val dataStore: DataStore<Preferences>) {
         return consumed
     }
 
-    suspend fun addUndos(amount: Int) {
+    override suspend fun addUndos(amount: Int) {
         dataStore.edit { preferences ->
             val current = preferences[PreferencesKeys.UNDOS] ?: 0
             preferences[PreferencesKeys.UNDOS] = current + amount
         }
     }
 
-    suspend fun consumeUndo(): Boolean {
+    override suspend fun consumeUndo(): Boolean {
         var consumed = false
         dataStore.edit { preferences ->
             val current = preferences[PreferencesKeys.UNDOS] ?: 0
@@ -128,7 +114,7 @@ class UserPreferencesRepository(private val dataStore: DataStore<Preferences>) {
         return consumed
     }
 
-    suspend fun spendCoins(amount: Int): Boolean {
+    override suspend fun spendCoins(amount: Int): Boolean {
         var spent = false
         dataStore.edit { preferences ->
             val current = preferences[PreferencesKeys.COINS] ?: 300
@@ -140,33 +126,33 @@ class UserPreferencesRepository(private val dataStore: DataStore<Preferences>) {
         return spent
     }
 
-    suspend fun incrementGamesPlayed() {
+    override suspend fun incrementGamesPlayed() {
         dataStore.edit { preferences ->
             val current = preferences[PreferencesKeys.GAMES_PLAYED] ?: 0
             preferences[PreferencesKeys.GAMES_PLAYED] = current + 1
         }
     }
 
-    suspend fun incrementGamesWon() {
+    override suspend fun incrementGamesWon() {
         dataStore.edit { preferences ->
             val current = preferences[PreferencesKeys.GAMES_WON] ?: 0
             preferences[PreferencesKeys.GAMES_WON] = current + 1
         }
     }
 
-    suspend fun setSoundEnabled(enabled: Boolean) {
+    override suspend fun setSoundEnabled(enabled: Boolean) {
         dataStore.edit { preferences ->
             preferences[PreferencesKeys.SOUND_ENABLED] = enabled
         }
     }
 
-    suspend fun setMusicEnabled(enabled: Boolean) {
+    override suspend fun setMusicEnabled(enabled: Boolean) {
         dataStore.edit { preferences ->
             preferences[PreferencesKeys.MUSIC_ENABLED] = enabled
         }
     }
 
-    suspend fun updateLastChallengeResetTime(time: Long) {
+    override suspend fun updateLastChallengeResetTime(time: Long) {
         dataStore.edit { preferences ->
             preferences[PreferencesKeys.LAST_CHALLENGE_RESET_TIME] = time
             // Also reset all challenge progress
@@ -178,13 +164,14 @@ class UserPreferencesRepository(private val dataStore: DataStore<Preferences>) {
         }
     }
 
-    suspend fun updateChallengeProgress(id: String, progress: Int) {
+    override suspend fun updateChallengeProgress(id: String, progress: Int) {
         dataStore.edit { preferences ->
-            preferences[intPreferencesKey(PreferencesKeys.CHALLENGE_PROGRESS_PREFIX + id)] = progress
+            preferences[intPreferencesKey(PreferencesKeys.CHALLENGE_PROGRESS_PREFIX + id)] =
+                progress
         }
     }
 
-    suspend fun markChallengeClaimed(id: String) {
+    override suspend fun markChallengeClaimed(id: String) {
         dataStore.edit { preferences ->
             preferences[booleanPreferencesKey(PreferencesKeys.CHALLENGE_CLAIMED_PREFIX + id)] = true
         }

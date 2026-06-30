@@ -3,7 +3,7 @@ package com.jn.trixo.ui.viewmodels
 import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.jn.trixo.data.UserPreferencesRepository
+import com.jn.trixo.domain.repository.UserPreferencesRepository
 import com.jn.trixo.ui.theme.NeonCyan
 import com.jn.trixo.ui.theme.NeonGreen
 import com.jn.trixo.ui.theme.NeonMagenta
@@ -31,6 +31,15 @@ data class DailyChallenge(
 data class DailyChallengesUiState(
     val challenges: List<DailyChallenge> = emptyList()
 )
+
+sealed class DailyChallengesEvent {
+    data class ClaimReward(val challengeId: String, val onRewardClaimed: (Int) -> Unit) :
+        DailyChallengesEvent()
+
+    object IncrementGamerProgress : DailyChallengesEvent()
+    object IncrementWinnerProgress : DailyChallengesEvent()
+    object IncrementStrategistProgress : DailyChallengesEvent()
+}
 
 class DailyChallengesViewModel(private val repository: UserPreferencesRepository) : ViewModel() {
     companion object {
@@ -88,7 +97,20 @@ class DailyChallengesViewModel(private val repository: UserPreferencesRepository
                 lastResetCalendar.get(Calendar.YEAR) != currentCalendar.get(Calendar.YEAR)
     }
 
-    fun claimReward(challengeId: String, onRewardClaimed: (Int) -> Unit) {
+    fun onEvent(event: DailyChallengesEvent) {
+        when (event) {
+            is DailyChallengesEvent.ClaimReward -> claimReward(
+                event.challengeId,
+                event.onRewardClaimed
+            )
+
+            DailyChallengesEvent.IncrementGamerProgress -> incrementGamerProgress()
+            DailyChallengesEvent.IncrementWinnerProgress -> incrementWinnerProgress()
+            DailyChallengesEvent.IncrementStrategistProgress -> incrementStrategistProgress()
+        }
+    }
+
+    private fun claimReward(challengeId: String, onRewardClaimed: (Int) -> Unit) {
         val challenge = _uiState.value.challenges.find { it.id == challengeId }
         if (challenge != null && (challenge.isCompleted && !challenge.isClaimed)) {
             viewModelScope.launch {
@@ -98,15 +120,15 @@ class DailyChallengesViewModel(private val repository: UserPreferencesRepository
         }
     }
 
-    fun incrementGamerProgress() {
+    private fun incrementGamerProgress() {
         updateProgress("1")
     }
 
-    fun incrementWinnerProgress() {
+    private fun incrementWinnerProgress() {
         updateProgress("2")
     }
 
-    fun incrementStrategistProgress() {
+    private fun incrementStrategistProgress() {
         updateProgress("3")
     }
 

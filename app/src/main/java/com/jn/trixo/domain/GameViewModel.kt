@@ -2,6 +2,9 @@ package com.jn.trixo.domain
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.jn.trixo.domain.usecase.CalculateScoreUseCase
+import com.jn.trixo.domain.usecase.GetAiMoveUseCase
+import com.jn.trixo.domain.usecase.GetGameResultUseCase
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -36,13 +39,33 @@ data class GameState(
     val winRequirement get() = difficulty.winReq
 }
 
-class GameViewModel : ViewModel() {
+sealed class GameEvent {
+    data class PlayMove(val index: Int) : GameEvent()
+    object UndoMove : GameEvent()
+    object RequestHint : GameEvent()
+    data class ResetGame(val difficulty: Difficulty, val isPvP: Boolean) : GameEvent()
+}
+
+class GameViewModel(
+    private val getAiMoveUseCase: GetAiMoveUseCase = GetAiMoveUseCase(),
+    private val getGameResultUseCase: GetGameResultUseCase = GetGameResultUseCase(),
+    private val calculateScoreUseCase: CalculateScoreUseCase = CalculateScoreUseCase()
+) : ViewModel() {
     private val _gameState = MutableStateFlow(GameState())
     val gameState: StateFlow<GameState> = _gameState.asStateFlow()
     private var aiMoveJob: Job? = null
     private var gameSessionId: Long = 0L
 
-    fun playMove(index: Int) {
+    fun onEvent(event: GameEvent) {
+        when (event) {
+            is GameEvent.PlayMove -> playMove(event.index)
+            GameEvent.UndoMove -> undoMove()
+            GameEvent.RequestHint -> requestHint()
+            is GameEvent.ResetGame -> resetGame(event.difficulty, event.isPvP)
+        }
+    }
+
+    private fun playMove(index: Int) {
         val state = _gameState.value
         if (index !in state.board.indices) return
         if (state.board[index] != Player.NONE || state.result != GameResult.NONE || state.isAiTurn) {
@@ -56,10 +79,14 @@ class GameViewModel : ViewModel() {
         val newBoard = state.board.toMutableList()
         newBoard[index] = state.currentPlayer
 
-        val (result, winLine) = getFullBoardResult(newBoard, state.boardSize, state.winRequirement)
+        val (result, winLine) = getGameResultUseCase(
+            newBoard,
+            state.boardSize,
+            state.winRequirement
+        )
 
         if (result != GameResult.NONE) {
-            val (score, reward) = calculateScoreAndReward(state, result, newBoard)
+            val (score, reward) = calculateScoreUseCase(state.difficulty, result, newBoard)
             _gameState.value = state.copy(
                 board = newBoard,
                 result = result,
@@ -87,7 +114,7 @@ class GameViewModel : ViewModel() {
         }
     }
 
-    fun undoMove() {
+    private fun undoMove() {
         val state = _gameState.value
         if (state.history.isEmpty() || state.isAiTurn || state.result != GameResult.NONE) return
 
@@ -103,12 +130,17 @@ class GameViewModel : ViewModel() {
         )
     }
 
-    fun requestHint() {
+    private fun requestHint() {
         val state = _gameState.value
         if (state.result != GameResult.NONE || state.isAiTurn) return
 
         val move =
-            findBestMove(state.board, state.currentPlayer, state.boardSize, state.winRequirement)
+            getAiMoveUseCase(
+                state.board,
+                state.currentPlayer,
+                state.boardSize,
+                state.winRequirement
+            )
         if (move != -1) {
             _gameState.value = state.copy(hintIndex = move)
         }
@@ -122,17 +154,18 @@ class GameViewModel : ViewModel() {
             if (sessionId != gameSessionId) return@launch
             if (state.result != GameResult.NONE || !state.isAiTurn || state.currentPlayer != Player.O) return@launch
 
-            val move = findBestMove(state.board, Player.O, state.boardSize, state.winRequirement)
+            val move =
+                getAiMoveUseCase(state.board, Player.O, state.boardSize, state.winRequirement)
             if (move != -1) {
                 val newBoard = state.board.toMutableList()
                 newBoard[move] = Player.O
 
-                val (result, winLine) = getFullBoardResult(
+                val (result, winLine) = getGameResultUseCase(
                     newBoard,
                     state.boardSize,
                     state.winRequirement
                 )
-                val (score, reward) = calculateScoreAndReward(state, result, newBoard)
+                val (score, reward) = calculateScoreUseCase(state.difficulty, result, newBoard)
                 _gameState.value = state.copy(
                     board = newBoard,
                     currentPlayer = Player.X,
@@ -146,176 +179,10 @@ class GameViewModel : ViewModel() {
         }
     }
 
-    private fun calculateScoreAndReward(
-        state: GameState,
-        result: GameResult,
-        board: List<Player>
-    ): Pair<Int, Int> {
-        if (result == GameResult.NONE) return 0 to 0
-
-        val difficultyMultiplier = when (state.difficulty) {
-            Difficulty.EASY -> 1
-            Difficulty.MEDIUM -> 2
-            Difficulty.HARD -> 3
-            Difficulty.VERY_HARD -> 5
-        }
-
-        val emptyCells = board.count { it == Player.NONE }
-
-        val score = when (result) {
-            GameResult.X_WINS -> (1000 + (emptyCells * 10)) * difficultyMultiplier
-            GameResult.DRAW -> 500 * difficultyMultiplier
-            else -> 100 * difficultyMultiplier
-        }
-
-        val reward = when (result) {
-            GameResult.X_WINS -> 50 * difficultyMultiplier
-            GameResult.DRAW -> 10 * difficultyMultiplier
-            else -> 0
-        }
-
-        return score to reward
-    }
-
-    private fun findBestMove(board: List<Player>, aiPlayer: Player, size: Int, winReq: Int): Int {
-        val humanPlayer = if (aiPlayer == Player.X) Player.O else Player.X
-        val availableMoves =
-            board.mapIndexedNotNull { index, player -> if (player == Player.NONE) index else null }
-        if (availableMoves.isEmpty()) return -1
-
-        // 1. Check for AI win
-        for (move in availableMoves) {
-            val r = move / size
-            val c = move % size
-            if (checkLineForWin(board, r, c, aiPlayer, size, winReq)) {
-                return move
-            }
-        }
-
-        // 2. Check for human win and block
-        for (move in availableMoves) {
-            val r = move / size
-            val c = move % size
-            if (checkLineForWin(board, r, c, humanPlayer, size, winReq)) {
-                return move
-            }
-        }
-
-        // 3. Take center or near center
-        val centerRow = size / 2
-        val centerCol = size / 2
-        val centerIndex = centerRow * size + centerCol
-        if (board[centerIndex] == Player.NONE) {
-            return centerIndex
-        }
-
-        // 4. Try to pick a move adjacent to existing pieces (makes AI look smarter)
-        val adjacentMoves = availableMoves.filter { move ->
-            hasAdjacentPiece(board, move, size)
-        }
-        if (adjacentMoves.isNotEmpty()) {
-            return adjacentMoves.random()
-        }
-
-        // 5. Random available move
-        return availableMoves.random()
-    }
-
-    private fun checkLineForWin(
-        board: List<Player>,
-        r: Int,
-        c: Int,
-        player: Player,
-        size: Int,
-        winReq: Int
-    ): Boolean {
-        val directions = listOf(Pair(0, 1), Pair(1, 0), Pair(1, 1), Pair(1, -1))
-        for ((dr, dc) in directions) {
-            var count = 1
-            // check forward
-            var i = 1
-            while (true) {
-                val nr = r + dr * i
-                val nc = c + dc * i
-                if (nr in 0 until size && nc in 0 until size && board[nr * size + nc] == player) {
-                    count++
-                    i++
-                } else break
-            }
-            // check backward
-            i = 1
-            while (true) {
-                val nr = r - dr * i
-                val nc = c - dc * i
-                if (nr in 0 until size && nc in 0 until size && board[nr * size + nc] == player) {
-                    count++
-                    i++
-                } else break
-            }
-            if (count >= winReq) return true
-        }
-        return false
-    }
-
-    private fun hasAdjacentPiece(board: List<Player>, move: Int, size: Int): Boolean {
-        val r = move / size
-        val c = move % size
-        for (dr in -1..1) {
-            for (dc in -1..1) {
-                if (dr == 0 && dc == 0) continue
-                val nr = r + dr
-                val nc = c + dc
-                if (nr in 0 until size && nc in 0 until size && board[nr * size + nc] != Player.NONE) {
-                    return true
-                }
-            }
-        }
-        return false
-    }
-
-    private fun getFullBoardResult(
-        board: List<Player>,
-        size: Int,
-        winReq: Int
-    ): Pair<GameResult, List<Int>?> {
-        val directions = listOf(Pair(0, 1), Pair(1, 0), Pair(1, 1), Pair(1, -1))
-
-        for (r in 0 until size) {
-            for (c in 0 until size) {
-                val p = board[r * size + c]
-                if (p == Player.NONE) continue
-
-                for ((dr, dc) in directions) {
-                    val line = mutableListOf<Int>()
-                    var valid = true
-                    for (i in 0 until winReq) {
-                        val nr = r + dr * i
-                        val nc = c + dc * i
-                        if (nr in 0 until size && nc in 0 until size && board[nr * size + nc] == p) {
-                            line.add(nr * size + nc)
-                        } else {
-                            valid = false
-                            break
-                        }
-                    }
-                    if (valid) {
-                        return Pair(
-                            if (p == Player.X) GameResult.X_WINS else GameResult.O_WINS,
-                            line
-                        )
-                    }
-                }
-            }
-        }
-
-        if (board.none { it == Player.NONE }) {
-            return Pair(GameResult.DRAW, null)
-        }
-
-        return Pair(GameResult.NONE, null)
-    }
-
-    fun resetGame(difficulty: Difficulty = _gameState.value.difficulty, isPvP: Boolean = false) {
+    private fun resetGame(
+        difficulty: Difficulty = _gameState.value.difficulty,
+        isPvP: Boolean = false
+    ) {
         aiMoveJob?.cancel()
         gameSessionId++
         _gameState.value = GameState(
