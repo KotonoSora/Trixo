@@ -32,18 +32,19 @@ data class StoreProduct(
 )
 
 class BillingManager(
-    private val context: Context,
+    context: Context,
     private val preferencesRepository: UserPreferencesRepository,
     private val onPurchaseSuccess: (Int) -> Unit = {}
 ) : PurchasesUpdatedListener {
 
-    private val isDebug = (context.applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE) != 0
+    private val applicationContext = context.applicationContext
+    private val isDebug = (applicationContext.applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE) != 0
 
     private val pendingPurchasesParams = PendingPurchasesParams.newBuilder()
         .enableOneTimeProducts()
         .build()
 
-    private val billingClient: BillingClient = BillingClient.newBuilder(context)
+    private val billingClient: BillingClient = BillingClient.newBuilder(applicationContext)
         .setListener(this)
         .enablePendingPurchases(pendingPurchasesParams)
         .build()
@@ -68,11 +69,9 @@ class BillingManager(
     }
 
     init {
-        if (isDebug) {
-            queryProducts()
-        } else {
-            startConnection()
-        }
+        // Always attempt to connect to Google Play, even in debug mode.
+        // This allows developers to test real IAPs in debug builds.
+        startConnection()
     }
 
     private fun startConnection() {
@@ -80,40 +79,21 @@ class BillingManager(
             override fun onBillingSetupFinished(billingResult: BillingResult) {
                 if (billingResult.responseCode == BillingClient.BillingResponseCode.OK) {
                     queryProducts()
+                } else {
+                    // Fallback to mock data if connection fails in debug mode
+                    if (isDebug) {
+                        loadMockProducts()
+                    }
                 }
             }
 
             override fun onBillingServiceDisconnected() {
-                // Connection lost. It's better to wait for the next interaction to reconnect
-                // or use an exponential backoff strategy if it's critical.
+                // In a production app, consider implementing a retry policy here.
             }
         })
     }
 
     private fun queryProducts() {
-        if (isDebug) {
-            val mockProducts = COIN_PACKS.map { (id, coins) ->
-                StoreProduct(
-                    productId = id,
-                    title = "$coins Coins",
-                    price = when (id) {
-                        "coins_100" -> "$0.29"
-                        "coins_500" -> "$0.49"
-                        "coins_1000" -> "$0.69"
-                        "coins_1500" -> "$0.99"
-                        "coins_2000" -> "$1.99"
-                        "coins_2500" -> "$3.99"
-                        "coins_3000" -> "$4.99"
-                        "coins_3500" -> "$7.99"
-                        "coins_4000" -> "$9.99"
-                        else -> "Unknown"
-                    }
-                )
-            }.sortedBy { COIN_PACKS[it.productId] ?: 0 }
-            _products.value = mockProducts
-            return
-        }
-
         val productIds = COIN_PACKS.keys.toList()
         val productList = productIds.map { id ->
             QueryProductDetailsParams.Product.newBuilder()
@@ -128,29 +108,63 @@ class BillingManager(
 
         billingClient.queryProductDetailsAsync(params) { billingResult, result ->
             if (billingResult.responseCode == BillingClient.BillingResponseCode.OK) {
-                val sortedProducts = result.productDetailsList.sortedBy { product ->
-                    COIN_PACKS[product.productId] ?: Int.MAX_VALUE
-                }.map { product ->
-                    StoreProduct(
-                        productId = product.productId,
-                        title = product.name,
-                        price = product.oneTimePurchaseOfferDetails?.formattedPrice ?: "Unknown",
-                        originalDetails = product
-                    )
+                val detailsList = result.productDetailsList
+                if (detailsList.isNotEmpty()) {
+                    val sortedProducts = detailsList.sortedBy { product ->
+                        COIN_PACKS[product.productId] ?: Int.MAX_VALUE
+                    }.map { product ->
+                        StoreProduct(
+                            productId = product.productId,
+                            title = product.name,
+                            price = product.oneTimePurchaseOfferDetails?.formattedPrice ?: "Unknown",
+                            originalDetails = product
+                        )
+                    }
+                    _products.value = sortedProducts
+                } else if (isDebug) {
+                    // No real products found in Play Store, use mocks in debug mode
+                    loadMockProducts()
                 }
-                _products.value = sortedProducts
+            } else {
+                if (isDebug) {
+                    loadMockProducts()
+                }
             }
         }
     }
 
+    private fun loadMockProducts() {
+        val mockProducts = COIN_PACKS.map { (id, coins) ->
+            StoreProduct(
+                productId = id,
+                title = "$coins Coins",
+                price = when (id) {
+                    "coins_100" -> "$0.29"
+                    "coins_500" -> "$0.49"
+                    "coins_1000" -> "$0.69"
+                    "coins_1500" -> "$0.99"
+                    "coins_2000" -> "$1.99"
+                    "coins_2500" -> "$3.99"
+                    "coins_3000" -> "$4.99"
+                    "coins_3500" -> "$7.99"
+                    "coins_4000" -> "$9.99"
+                    else -> "Unknown"
+                }
+            )
+        }.sortedBy { COIN_PACKS[it.productId] ?: 0 }
+        _products.value = mockProducts
+    }
+
     fun launchBillingFlow(activity: Activity, product: StoreProduct) {
-        if (isDebug && product.originalDetails == null) {
-            // Mock purchase flow
-            grantCoins(listOf(product.productId))
+        // Use real billing flow if originalDetails is available
+        val originalDetails = product.originalDetails
+        if (originalDetails == null) {
+            if (isDebug) {
+                // Mock purchase flow for debug products
+                grantCoins(listOf(product.productId))
+            }
             return
         }
-
-        val originalDetails = product.originalDetails ?: return
 
         val productDetailsParamsList = listOf(
             BillingFlowParams.ProductDetailsParams.newBuilder()
@@ -204,7 +218,9 @@ class BillingManager(
     }
 
     fun endConnection() {
-        billingClient.endConnection()
+        if (billingClient.isReady) {
+            billingClient.endConnection()
+        }
         scope.cancel()
     }
 }
