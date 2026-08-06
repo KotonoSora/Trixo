@@ -138,7 +138,13 @@ fun MainTopBarPreview() {
         Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
             MainTopBar(coins = 500, showShopIcon = true)
             MainTopBar(coins = 1200, title = "SCREEN TITLE", onBackClick = {})
-            MainTopBar(coins = 2500, title = "SHOP", onBackClick = {}, onShopClick = {}, showShopIcon = true)
+            MainTopBar(
+                coins = 2500,
+                title = "SHOP",
+                onBackClick = {},
+                onShopClick = {},
+                showShopIcon = true
+            )
         }
     }
 }
