@@ -10,9 +10,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.rounded.Help
 import androidx.compose.material.icons.rounded.EmojiEvents
 import androidx.compose.material.icons.rounded.Event
-import androidx.compose.material.icons.automirrored.rounded.Help
 import androidx.compose.material.icons.rounded.PlayArrow
 import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.material.icons.rounded.ShoppingCart
@@ -23,18 +23,18 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.tooling.preview.Preview
-import com.kotonosora.tictactoe.ui.MainViewModel
+import androidx.compose.ui.unit.dp
+import com.kotonosora.tictactoe.ui.components.MainTopBar
 import com.kotonosora.tictactoe.ui.components.NeonButton
 import com.kotonosora.tictactoe.ui.components.NeonTitle
-import com.kotonosora.tictactoe.ui.components.MainTopBar
+import com.kotonosora.tictactoe.ui.theme.AppTheme
 import com.kotonosora.tictactoe.ui.theme.NeonBlue
 import com.kotonosora.tictactoe.ui.theme.NeonCyan
 import com.kotonosora.tictactoe.ui.theme.NeonGreen
 import com.kotonosora.tictactoe.ui.theme.NeonMagenta
 import com.kotonosora.tictactoe.ui.theme.NeonYellow
-import com.kotonosora.tictactoe.ui.theme.AppTheme
+import com.kotonosora.tictactoe.ui.viewmodels.MainViewModel
 
 @Composable
 fun HomeScreen(
@@ -47,10 +47,10 @@ fun HomeScreen(
     onNavigateToHelp: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val userPrefs by viewModel.userPreferences.collectAsState()
+    val uiState by viewModel.uiState.collectAsState()
 
     HomeScreenContent(
-        coins = userPrefs.coins,
+        coins = uiState.userPreferences.coins,
         onNavigateToGameMode = onNavigateToGameMode,
         onNavigateToCoinShop = onNavigateToCoinShop,
         onNavigateToSettings = onNavigateToSettings,
@@ -169,7 +169,9 @@ fun HomeScreenContent(
             }
 
             // Bottom spacer for visual balance
-            Spacer(modifier = Modifier.height(20.dp).navigationBarsPadding())
+            Spacer(modifier = Modifier
+                .height(20.dp)
+                .navigationBarsPadding())
         }
     }
 }

@@ -14,12 +14,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.tooling.preview.Preview
-import com.kotonosora.tictactoe.ui.MainViewModel
-import com.kotonosora.tictactoe.ui.components.NeonText
+import androidx.compose.ui.unit.dp
 import com.kotonosora.tictactoe.ui.components.MainTopBar
+import com.kotonosora.tictactoe.ui.components.NeonText
 import com.kotonosora.tictactoe.ui.theme.AppTheme
+import com.kotonosora.tictactoe.ui.viewmodels.MainViewModel
 
 @Composable
 fun HelpScreen(
@@ -27,10 +27,10 @@ fun HelpScreen(
     onNavigateBack: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val userPreferences by mainViewModel.userPreferences.collectAsState()
+    val uiState by mainViewModel.uiState.collectAsState()
 
     HelpScreenContent(
-        coins = userPreferences.coins,
+        coins = uiState.userPreferences.coins,
         onNavigateBack = onNavigateBack,
         modifier = modifier
     )

@@ -52,23 +52,24 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.kotonosora.tictactoe.audio.LocalSoundManager
 import com.kotonosora.tictactoe.audio.SoundManager
-import com.kotonosora.tictactoe.domain.Difficulty
-import com.kotonosora.tictactoe.domain.GameEvent
-import com.kotonosora.tictactoe.domain.GameResult
-import com.kotonosora.tictactoe.domain.GameState
-import com.kotonosora.tictactoe.domain.GameViewModel
-import com.kotonosora.tictactoe.domain.Player
-import com.kotonosora.tictactoe.ui.MainViewModel
+import com.kotonosora.tictactoe.ui.components.MainTopBar
 import com.kotonosora.tictactoe.ui.components.NeonButton
 import com.kotonosora.tictactoe.ui.components.NeonText
-import com.kotonosora.tictactoe.ui.components.MainTopBar
+import com.kotonosora.tictactoe.ui.theme.AppTheme
 import com.kotonosora.tictactoe.ui.theme.NeonCyan
 import com.kotonosora.tictactoe.ui.theme.NeonMagenta
 import com.kotonosora.tictactoe.ui.theme.NeonRed
 import com.kotonosora.tictactoe.ui.theme.NeonYellow
-import com.kotonosora.tictactoe.ui.theme.AppTheme
 import com.kotonosora.tictactoe.ui.viewmodels.DailyChallengesEvent
 import com.kotonosora.tictactoe.ui.viewmodels.DailyChallengesViewModel
+import com.kotonosora.tictactoe.ui.viewmodels.Difficulty
+import com.kotonosora.tictactoe.ui.viewmodels.GameEvent
+import com.kotonosora.tictactoe.ui.viewmodels.GameResult
+import com.kotonosora.tictactoe.ui.viewmodels.GameState
+import com.kotonosora.tictactoe.ui.viewmodels.GameViewModel
+import com.kotonosora.tictactoe.ui.viewmodels.MainEvent
+import com.kotonosora.tictactoe.ui.viewmodels.MainViewModel
+import com.kotonosora.tictactoe.ui.viewmodels.Player
 
 @Composable
 fun GameplayScreen(
@@ -81,7 +82,8 @@ fun GameplayScreen(
     modifier: Modifier = Modifier
 ) {
     val gameState by gameViewModel.gameState.collectAsState()
-    val userPreferences by mainViewModel.userPreferences.collectAsState()
+    val mainUiState by mainViewModel.uiState.collectAsState()
+    val userPreferences = mainUiState.userPreferences
     val context = LocalContext.current
     val soundManager = LocalSoundManager.current
 
@@ -98,14 +100,15 @@ fun GameplayScreen(
                 soundManager.playTap()
             }
 
-            mainViewModel.recordGameFinished(
+            mainViewModel.onEvent(
+                MainEvent.RecordGameFinished(
                 won = won,
                 score = gameState.score,
                 reward = gameState.reward,
                 onNewHighScore = {
                     soundManager.playMilestone(gameState.score)
                 }
-            )
+            ))
 
             // Update daily challenges
             dailyChallengesViewModel.onEvent(DailyChallengesEvent.IncrementGamerProgress)
@@ -119,7 +122,7 @@ fun GameplayScreen(
 
     LaunchedEffect(gameState.score) {
         if (gameState.score > 0 && gameState.result == GameResult.NONE) {
-             soundManager.playMilestone(gameState.score)
+            soundManager.playMilestone(gameState.score)
         }
     }
 
@@ -147,7 +150,8 @@ fun GameplayScreen(
         },
         onUseHint = {
             if (userPreferences.hints > 0) {
-                mainViewModel.consumeHint(
+                mainViewModel.onEvent(
+                    MainEvent.ConsumeHint(
                     onSuccess = {
                         soundManager.playTap()
                         gameViewModel.onEvent(GameEvent.RequestHint)
@@ -156,9 +160,9 @@ fun GameplayScreen(
                     onFailure = {
                         soundManager.playError()
                     }
-                )
+                ))
             } else {
-                mainViewModel.spendCoins(30, onSuccess = {
+                mainViewModel.onEvent(MainEvent.SpendCoins(30, onSuccess = {
                     soundManager.playTap()
                     gameViewModel.onEvent(GameEvent.RequestHint)
                     dailyChallengesViewModel.onEvent(DailyChallengesEvent.IncrementStrategistProgress)
@@ -166,12 +170,13 @@ fun GameplayScreen(
                     soundManager.playError()
                     Toast.makeText(context, "Not enough coins!", Toast.LENGTH_SHORT)
                         .show()
-                })
+                }))
             }
         },
         onUseUndo = {
             if (userPreferences.undos > 0) {
-                mainViewModel.consumeUndo(
+                mainViewModel.onEvent(
+                    MainEvent.ConsumeUndo(
                     onSuccess = {
                         soundManager.playTap()
                         gameViewModel.onEvent(GameEvent.UndoMove)
@@ -179,16 +184,16 @@ fun GameplayScreen(
                     onFailure = {
                         soundManager.playError()
                     }
-                )
+                ))
             } else {
-                mainViewModel.spendCoins(15, onSuccess = {
+                mainViewModel.onEvent(MainEvent.SpendCoins(15, onSuccess = {
                     soundManager.playTap()
                     gameViewModel.onEvent(GameEvent.UndoMove)
                 }, onFailure = {
                     soundManager.playError()
                     Toast.makeText(context, "Not enough coins!", Toast.LENGTH_SHORT)
                         .show()
-                })
+                }))
             }
         },
         modifier = modifier
@@ -460,7 +465,9 @@ fun GameplayScreenPreview() {
     CompositionLocalProvider(LocalSoundManager provides SoundManager(null)) {
         AppTheme {
             GameplayContent(
-                gameState = GameState(difficulty = Difficulty.EASY, board = List(9) { Player.NONE }),
+                gameState = GameState(
+                    difficulty = Difficulty.EASY,
+                    board = List(9) { Player.NONE }),
                 coins = 300,
                 hints = 2,
                 undos = 5,
@@ -480,7 +487,9 @@ fun GameplayScreenLargePreview() {
     CompositionLocalProvider(LocalSoundManager provides SoundManager(null)) {
         AppTheme {
             GameplayContent(
-                gameState = GameState(difficulty = Difficulty.VERY_HARD, board = List(225) { Player.NONE }),
+                gameState = GameState(
+                    difficulty = Difficulty.VERY_HARD,
+                    board = List(225) { Player.NONE }),
                 coins = 300,
                 hints = 0,
                 undos = 0,

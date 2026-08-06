@@ -38,18 +38,19 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.kotonosora.tictactoe.ui.MainViewModel
-import com.kotonosora.tictactoe.ui.components.NeonText
 import com.kotonosora.tictactoe.ui.components.MainTopBar
+import com.kotonosora.tictactoe.ui.components.NeonText
+import com.kotonosora.tictactoe.ui.theme.AppTheme
 import com.kotonosora.tictactoe.ui.theme.NeonCyan
 import com.kotonosora.tictactoe.ui.theme.NeonGreen
 import com.kotonosora.tictactoe.ui.theme.NeonMagenta
 import com.kotonosora.tictactoe.ui.theme.NeonYellow
 import com.kotonosora.tictactoe.ui.theme.PressStart2PFontFamily
-import com.kotonosora.tictactoe.ui.theme.AppTheme
 import com.kotonosora.tictactoe.ui.viewmodels.DailyChallenge
 import com.kotonosora.tictactoe.ui.viewmodels.DailyChallengesEvent
 import com.kotonosora.tictactoe.ui.viewmodels.DailyChallengesViewModel
+import com.kotonosora.tictactoe.ui.viewmodels.MainEvent
+import com.kotonosora.tictactoe.ui.viewmodels.MainViewModel
 
 @Composable
 fun DailyChallengesScreen(
@@ -59,16 +60,16 @@ fun DailyChallengesScreen(
     onNavigateToPlay: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val userPrefs by mainViewModel.userPreferences.collectAsState()
+    val mainUiState by mainViewModel.uiState.collectAsState()
     val uiState by dailyChallengesViewModel.uiState.collectAsState()
 
     DailyChallengesContent(
-        coins = userPrefs.coins,
+        coins = mainUiState.userPreferences.coins,
         challenges = uiState.challenges,
         onClaimReward = { challengeId ->
             dailyChallengesViewModel.onEvent(
                 DailyChallengesEvent.ClaimReward(challengeId) { coins ->
-                    mainViewModel.addCoins(coins)
+                    mainViewModel.onEvent(MainEvent.AddCoins(coins))
                 }
             )
         },
@@ -196,7 +197,11 @@ fun ChallengeItem(
                             contentColor = challenge.color
                         ),
                         modifier = Modifier
-                            .border(1.dp, challenge.color.copy(alpha = 0.5f), RoundedCornerShape(8.dp))
+                            .border(
+                                1.dp,
+                                challenge.color.copy(alpha = 0.5f),
+                                RoundedCornerShape(8.dp)
+                            )
                             .height(36.dp)
                     ) {
                         Text(

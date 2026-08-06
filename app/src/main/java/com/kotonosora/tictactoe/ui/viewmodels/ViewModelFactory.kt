@@ -3,8 +3,6 @@ package com.kotonosora.tictactoe.ui.viewmodels
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.kotonosora.tictactoe.di.AppContainer
-import com.kotonosora.tictactoe.domain.GameViewModel
-import com.kotonosora.tictactoe.ui.MainViewModel
 
 class AppViewModelFactory(private val container: AppContainer) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {

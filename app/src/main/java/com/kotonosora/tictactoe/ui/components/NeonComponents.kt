@@ -1,10 +1,14 @@
 package com.kotonosora.tictactoe.ui.components
 
 import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.PlayArrow
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
@@ -25,15 +29,11 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.kotonosora.tictactoe.audio.LocalSoundManager
+import com.kotonosora.tictactoe.ui.theme.AppTheme
 import com.kotonosora.tictactoe.ui.theme.NeonCyan
 import com.kotonosora.tictactoe.ui.theme.NeonMagenta
 import com.kotonosora.tictactoe.ui.theme.NeonYellow
 import com.kotonosora.tictactoe.ui.theme.PressStart2PFontFamily
-import com.kotonosora.tictactoe.ui.theme.AppTheme
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.PlayArrow
 
 
 @Composable
@@ -167,10 +167,10 @@ fun NeonComponentsPreview() {
         ) {
             NeonTitle("TITLE")
             NeonTitle("MAGENTA", color = NeonMagenta, fontSize = 24)
-            
+
             NeonText("Regular text")
             NeonText("Yellow text", color = NeonYellow, fontWeight = FontWeight.Bold)
-            
+
             NeonButton(text = "BUTTON", onClick = {})
             NeonButton(
                 text = "WITH ICON",
@@ -178,7 +178,7 @@ fun NeonComponentsPreview() {
                 icon = Icons.Rounded.PlayArrow,
                 color = NeonYellow
             )
-            
+
             Row(verticalAlignment = Alignment.CenterVertically) {
                 NeonIconButton(icon = Icons.Rounded.PlayArrow, onClick = {})
                 NeonIconButton(icon = Icons.Rounded.PlayArrow, onClick = {}, tint = NeonMagenta)

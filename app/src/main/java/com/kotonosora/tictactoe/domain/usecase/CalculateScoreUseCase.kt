@@ -1,8 +1,8 @@
 package com.kotonosora.tictactoe.domain.usecase
 
-import com.kotonosora.tictactoe.domain.Difficulty
-import com.kotonosora.tictactoe.domain.GameResult
-import com.kotonosora.tictactoe.domain.Player
+import com.kotonosora.tictactoe.ui.viewmodels.Difficulty
+import com.kotonosora.tictactoe.ui.viewmodels.GameResult
+import com.kotonosora.tictactoe.ui.viewmodels.Player
 import kotlin.math.min
 
 class CalculateScoreUseCase {

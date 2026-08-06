@@ -22,6 +22,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -33,14 +34,14 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.kotonosora.tictactoe.audio.LocalSoundManager
 import com.kotonosora.tictactoe.audio.SoundManager
-import com.kotonosora.tictactoe.ui.MainViewModel
-import com.kotonosora.tictactoe.ui.components.NeonText
 import com.kotonosora.tictactoe.ui.components.MainTopBar
+import com.kotonosora.tictactoe.ui.components.NeonText
+import com.kotonosora.tictactoe.ui.theme.AppTheme
 import com.kotonosora.tictactoe.ui.theme.NeonCyan
 import com.kotonosora.tictactoe.ui.theme.NeonMagenta
 import com.kotonosora.tictactoe.ui.theme.NeonYellow
-import com.kotonosora.tictactoe.ui.theme.AppTheme
-import androidx.compose.runtime.CompositionLocalProvider
+import com.kotonosora.tictactoe.ui.viewmodels.MainEvent
+import com.kotonosora.tictactoe.ui.viewmodels.MainViewModel
 
 @Composable
 fun SettingsScreen(
@@ -48,20 +49,20 @@ fun SettingsScreen(
     onNavigateBack: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val userPreferences by mainViewModel.userPreferences.collectAsState()
+    val uiState by mainViewModel.uiState.collectAsState()
     val soundManager = LocalSoundManager.current
 
     SettingsScreenContent(
-        coins = userPreferences.coins,
-        soundEnabled = userPreferences.soundEnabled,
-        musicEnabled = userPreferences.musicEnabled,
+        coins = uiState.userPreferences.coins,
+        soundEnabled = uiState.userPreferences.soundEnabled,
+        musicEnabled = uiState.userPreferences.musicEnabled,
         onSoundEnabledChange = {
             soundManager.playTap()
-            mainViewModel.setSoundEnabled(it)
+            mainViewModel.onEvent(MainEvent.SetSoundEnabled(it))
         },
         onMusicEnabledChange = {
             soundManager.playTap()
-            mainViewModel.setMusicEnabled(it)
+            mainViewModel.onEvent(MainEvent.SetMusicEnabled(it))
         },
         onNavigateBack = onNavigateBack,
         modifier = modifier

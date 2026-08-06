@@ -44,7 +44,7 @@ class SoundManager(context: Context? = null) {
     fun playError() = play("error")
     fun playWin() = play("win")
     fun playLose() = play("lose")
-    
+
     fun playMilestone(score: Int) {
         val milestone = when {
             score >= 500 -> "milestone_500"

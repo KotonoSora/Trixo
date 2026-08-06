@@ -1,4 +1,4 @@
-package com.kotonosora.tictactoe.domain
+package com.kotonosora.tictactoe.ui.viewmodels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -12,32 +12,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlin.time.Duration.Companion.milliseconds
-
-enum class Player { X, O, NONE }
-enum class GameResult { NONE, X_WINS, O_WINS, DRAW }
-enum class Difficulty(val size: Int, val winReq: Int) {
-    EASY(3, 3),
-    MEDIUM(9, 4),
-    HARD(12, 5),
-    VERY_HARD(15, 6)
-}
-
-data class GameState(
-    val difficulty: Difficulty = Difficulty.EASY,
-    val board: List<Player> = List(3 * 3) { Player.NONE },
-    val currentPlayer: Player = Player.X,
-    val result: GameResult = GameResult.NONE,
-    val isAiTurn: Boolean = false,
-    val winningLine: List<Int>? = null,
-    val hintIndex: Int? = null,
-    val history: List<List<Player>> = emptyList(),
-    val isPvP: Boolean = false,
-    val score: Int = 0,
-    val reward: Int = 0
-) {
-    val boardSize get() = difficulty.size
-    val winRequirement get() = difficulty.winReq
-}
 
 sealed class GameEvent {
     data class PlayMove(val index: Int) : GameEvent()

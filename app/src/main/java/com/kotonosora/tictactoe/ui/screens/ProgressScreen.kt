@@ -30,14 +30,14 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.kotonosora.tictactoe.ui.MainViewModel
+import com.kotonosora.tictactoe.ui.components.MainTopBar
 import com.kotonosora.tictactoe.ui.components.NeonText
 import com.kotonosora.tictactoe.ui.components.NeonTitle
-import com.kotonosora.tictactoe.ui.components.MainTopBar
+import com.kotonosora.tictactoe.ui.theme.AppTheme
 import com.kotonosora.tictactoe.ui.theme.NeonCyan
 import com.kotonosora.tictactoe.ui.theme.NeonMagenta
 import com.kotonosora.tictactoe.ui.theme.NeonYellow
-import com.kotonosora.tictactoe.ui.theme.AppTheme
+import com.kotonosora.tictactoe.ui.viewmodels.MainViewModel
 
 @Composable
 fun ProgressScreen(
@@ -45,7 +45,8 @@ fun ProgressScreen(
     onNavigateBack: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val userPreferences by mainViewModel.userPreferences.collectAsState()
+    val uiState by mainViewModel.uiState.collectAsState()
+    val userPreferences = uiState.userPreferences
 
     ProgressScreenContent(
         coins = userPreferences.coins,

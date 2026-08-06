@@ -9,8 +9,6 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.kotonosora.tictactoe.di.LocalAppContainer
-import com.kotonosora.tictactoe.domain.GameEvent
-import com.kotonosora.tictactoe.domain.GameViewModel
 import com.kotonosora.tictactoe.ui.navigation.AppDestinations
 import com.kotonosora.tictactoe.ui.screens.CoinShopScreen
 import com.kotonosora.tictactoe.ui.screens.DailyChallengesScreen
@@ -22,8 +20,11 @@ import com.kotonosora.tictactoe.ui.screens.LeaderboardScreen
 import com.kotonosora.tictactoe.ui.screens.ProgressScreen
 import com.kotonosora.tictactoe.ui.screens.ResultScreen
 import com.kotonosora.tictactoe.ui.screens.SettingsScreen
-import com.kotonosora.tictactoe.ui.viewmodels.DailyChallengesViewModel
 import com.kotonosora.tictactoe.ui.viewmodels.AppViewModelFactory
+import com.kotonosora.tictactoe.ui.viewmodels.DailyChallengesViewModel
+import com.kotonosora.tictactoe.ui.viewmodels.GameEvent
+import com.kotonosora.tictactoe.ui.viewmodels.GameViewModel
+import com.kotonosora.tictactoe.ui.viewmodels.MainViewModel
 
 @Composable
 fun MainApp(

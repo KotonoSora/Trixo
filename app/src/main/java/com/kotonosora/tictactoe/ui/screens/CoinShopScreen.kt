@@ -40,13 +40,13 @@ import androidx.compose.ui.unit.dp
 import com.kotonosora.tictactoe.audio.LocalSoundManager
 import com.kotonosora.tictactoe.billing.BillingManager
 import com.kotonosora.tictactoe.billing.StoreProduct
-import com.kotonosora.tictactoe.ui.MainViewModel
+import com.kotonosora.tictactoe.ui.components.MainTopBar
 import com.kotonosora.tictactoe.ui.components.NeonButton
 import com.kotonosora.tictactoe.ui.components.NeonText
-import com.kotonosora.tictactoe.ui.components.MainTopBar
+import com.kotonosora.tictactoe.ui.theme.AppTheme
 import com.kotonosora.tictactoe.ui.theme.NeonMagenta
 import com.kotonosora.tictactoe.ui.theme.NeonYellow
-import com.kotonosora.tictactoe.ui.theme.AppTheme
+import com.kotonosora.tictactoe.ui.viewmodels.MainViewModel
 
 @Composable
 fun CoinShopScreen(
@@ -65,7 +65,7 @@ fun CoinShopScreen(
 
     val products by billingManager.products.collectAsState()
     val error by billingManager.error.collectAsState()
-    val userPreferences by mainViewModel.userPreferences.collectAsState()
+    val uiState by mainViewModel.uiState.collectAsState()
 
     DisposableEffect(Unit) {
         onDispose {
@@ -76,7 +76,7 @@ fun CoinShopScreen(
     CoinShopContent(
         products = products,
         error = error,
-        coins = userPreferences.coins,
+        coins = uiState.userPreferences.coins,
         onNavigateBack = onNavigateBack,
         onTryAgain = { billingManager.startConnection() },
         onPurchaseProduct = { product ->

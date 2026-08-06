@@ -30,20 +30,20 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.kotonosora.tictactoe.audio.LocalSoundManager
 import com.kotonosora.tictactoe.audio.SoundManager
-import com.kotonosora.tictactoe.domain.Difficulty
-import com.kotonosora.tictactoe.domain.GameResult
-import com.kotonosora.tictactoe.domain.GameState
-import com.kotonosora.tictactoe.domain.GameViewModel
-import com.kotonosora.tictactoe.ui.MainViewModel
+import com.kotonosora.tictactoe.ui.components.MainTopBar
 import com.kotonosora.tictactoe.ui.components.NeonButton
 import com.kotonosora.tictactoe.ui.components.NeonText
 import com.kotonosora.tictactoe.ui.components.NeonTitle
-import com.kotonosora.tictactoe.ui.components.MainTopBar
+import com.kotonosora.tictactoe.ui.theme.AppTheme
 import com.kotonosora.tictactoe.ui.theme.NeonGreen
 import com.kotonosora.tictactoe.ui.theme.NeonMagenta
 import com.kotonosora.tictactoe.ui.theme.NeonRed
 import com.kotonosora.tictactoe.ui.theme.NeonYellow
-import com.kotonosora.tictactoe.ui.theme.AppTheme
+import com.kotonosora.tictactoe.ui.viewmodels.Difficulty
+import com.kotonosora.tictactoe.ui.viewmodels.GameResult
+import com.kotonosora.tictactoe.ui.viewmodels.GameState
+import com.kotonosora.tictactoe.ui.viewmodels.GameViewModel
+import com.kotonosora.tictactoe.ui.viewmodels.MainViewModel
 
 @Composable
 fun ResultScreen(
@@ -55,11 +55,11 @@ fun ResultScreen(
     modifier: Modifier = Modifier
 ) {
     val gameState by gameViewModel.gameState.collectAsState()
-    val userPreferences by mainViewModel.userPreferences.collectAsState()
+    val uiState by mainViewModel.uiState.collectAsState()
 
     ResultScreenContent(
         gameState = gameState,
-        coins = userPreferences.coins,
+        coins = uiState.userPreferences.coins,
         onNavigateHome = onNavigateHome,
         onNavigateToGameMode = onNavigateToGameMode,
         onNavigateToNextLevel = onNavigateToNextLevel,

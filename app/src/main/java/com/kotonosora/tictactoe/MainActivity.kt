@@ -13,10 +13,10 @@ import androidx.lifecycle.ViewModelProvider
 import com.kotonosora.tictactoe.audio.LocalSoundManager
 import com.kotonosora.tictactoe.audio.SoundManager
 import com.kotonosora.tictactoe.di.LocalAppContainer
-import com.kotonosora.tictactoe.ui.MainViewModel
 import com.kotonosora.tictactoe.ui.MainApp
 import com.kotonosora.tictactoe.ui.theme.AppTheme
 import com.kotonosora.tictactoe.ui.viewmodels.AppViewModelFactory
+import com.kotonosora.tictactoe.ui.viewmodels.MainViewModel
 
 class MainActivity : ComponentActivity() {
     private lateinit var viewModel: MainViewModel
@@ -34,9 +34,9 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             val soundManager = remember { SoundManager(applicationContext) }
-            val userPrefs by viewModel.userPreferences.collectAsState()
+            val uiState by viewModel.uiState.collectAsState()
 
-            soundManager.soundEnabled = userPrefs.soundEnabled
+            soundManager.soundEnabled = uiState.userPreferences.soundEnabled
 
             DisposableEffect(Unit) {
                 onDispose {

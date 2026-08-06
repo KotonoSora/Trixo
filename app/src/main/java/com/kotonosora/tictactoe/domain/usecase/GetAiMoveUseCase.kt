@@ -1,6 +1,6 @@
 package com.kotonosora.tictactoe.domain.usecase
 
-import com.kotonosora.tictactoe.domain.Player
+import com.kotonosora.tictactoe.ui.viewmodels.Player
 
 class GetAiMoveUseCase {
     operator fun invoke(board: List<Player>, aiPlayer: Player, size: Int, winReq: Int): Int {

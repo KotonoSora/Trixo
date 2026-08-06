@@ -26,13 +26,13 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.kotonosora.tictactoe.domain.model.GameHistory
-import com.kotonosora.tictactoe.ui.MainViewModel
+import com.kotonosora.tictactoe.ui.components.MainTopBar
 import com.kotonosora.tictactoe.ui.components.NeonText
 import com.kotonosora.tictactoe.ui.components.NeonTitle
-import com.kotonosora.tictactoe.ui.components.MainTopBar
+import com.kotonosora.tictactoe.ui.theme.AppTheme
 import com.kotonosora.tictactoe.ui.theme.NeonCyan
 import com.kotonosora.tictactoe.ui.theme.NeonYellow
-import com.kotonosora.tictactoe.ui.theme.AppTheme
+import com.kotonosora.tictactoe.ui.viewmodels.MainViewModel
 
 @Composable
 fun LeaderboardScreen(
@@ -40,12 +40,11 @@ fun LeaderboardScreen(
     onNavigateBack: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val userPrefs by mainViewModel.userPreferences.collectAsState()
-    val history by mainViewModel.gameHistory.collectAsState()
+    val uiState by mainViewModel.uiState.collectAsState()
 
     LeaderboardScreenContent(
-        coins = userPrefs.coins,
-        history = history,
+        coins = uiState.userPreferences.coins,
+        history = uiState.gameHistory,
         onNavigateBack = onNavigateBack,
         modifier = modifier
     )
@@ -111,7 +110,9 @@ fun LeaderboardScreenContent(
 
                 LazyColumn(
                     verticalArrangement = Arrangement.spacedBy(8.dp),
-                    modifier = Modifier.fillMaxSize().navigationBarsPadding()
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .navigationBarsPadding()
                 ) {
                     items(history) { entry ->
                         LeaderboardItem(entry)
