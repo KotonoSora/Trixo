@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
@@ -33,7 +34,9 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -44,8 +47,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.kotonosora.tictactoe.audio.LocalSoundManager
+import com.kotonosora.tictactoe.audio.SoundManager
+import com.kotonosora.tictactoe.domain.Difficulty
 import com.kotonosora.tictactoe.domain.GameEvent
 import com.kotonosora.tictactoe.domain.GameResult
 import com.kotonosora.tictactoe.domain.GameState
@@ -59,6 +66,7 @@ import com.kotonosora.tictactoe.ui.theme.NeonCyan
 import com.kotonosora.tictactoe.ui.theme.NeonMagenta
 import com.kotonosora.tictactoe.ui.theme.NeonRed
 import com.kotonosora.tictactoe.ui.theme.NeonYellow
+import com.kotonosora.tictactoe.ui.theme.AppTheme
 import com.kotonosora.tictactoe.ui.viewmodels.DailyChallengesEvent
 import com.kotonosora.tictactoe.ui.viewmodels.DailyChallengesViewModel
 
@@ -68,6 +76,7 @@ fun GameplayScreen(
     mainViewModel: MainViewModel,
     dailyChallengesViewModel: DailyChallengesViewModel,
     onNavigateToResult: () -> Unit,
+    onNavigateToShop: () -> Unit,
     onNavigateBack: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -92,7 +101,10 @@ fun GameplayScreen(
             mainViewModel.recordGameFinished(
                 won = won,
                 score = gameState.score,
-                reward = gameState.reward
+                reward = gameState.reward,
+                onNewHighScore = {
+                    soundManager.playMilestone(gameState.score)
+                }
             )
 
             // Update daily challenges
@@ -105,18 +117,104 @@ fun GameplayScreen(
         }
     }
 
+    LaunchedEffect(gameState.score) {
+        if (gameState.score > 0 && gameState.result == GameResult.NONE) {
+             soundManager.playMilestone(gameState.score)
+        }
+    }
+
     LaunchedEffect(gameState.isAiTurn) {
         if (!gameState.isAiTurn && gameState.board.any { it == Player.O } && gameState.result == GameResult.NONE) {
             soundManager.playTap()
         }
     }
 
+    GameplayContent(
+        gameState = gameState,
+        coins = userPreferences.coins,
+        hints = userPreferences.hints,
+        undos = userPreferences.undos,
+        onNavigateBack = onNavigateBack,
+        onNavigateToShop = onNavigateToShop,
+        onCellClicked = { index ->
+            val cell = gameState.board[index]
+            if (cell == Player.NONE && !gameState.isAiTurn && gameState.result == GameResult.NONE) {
+                soundManager.playTap()
+            } else if (cell != Player.NONE && gameState.result == GameResult.NONE) {
+                soundManager.playError()
+            }
+            gameViewModel.onEvent(GameEvent.PlayMove(index))
+        },
+        onUseHint = {
+            if (userPreferences.hints > 0) {
+                mainViewModel.consumeHint(
+                    onSuccess = {
+                        soundManager.playTap()
+                        gameViewModel.onEvent(GameEvent.RequestHint)
+                        dailyChallengesViewModel.onEvent(DailyChallengesEvent.IncrementStrategistProgress)
+                    },
+                    onFailure = {
+                        soundManager.playError()
+                    }
+                )
+            } else {
+                mainViewModel.spendCoins(30, onSuccess = {
+                    soundManager.playTap()
+                    gameViewModel.onEvent(GameEvent.RequestHint)
+                    dailyChallengesViewModel.onEvent(DailyChallengesEvent.IncrementStrategistProgress)
+                }, onFailure = {
+                    soundManager.playError()
+                    Toast.makeText(context, "Not enough coins!", Toast.LENGTH_SHORT)
+                        .show()
+                })
+            }
+        },
+        onUseUndo = {
+            if (userPreferences.undos > 0) {
+                mainViewModel.consumeUndo(
+                    onSuccess = {
+                        soundManager.playTap()
+                        gameViewModel.onEvent(GameEvent.UndoMove)
+                    },
+                    onFailure = {
+                        soundManager.playError()
+                    }
+                )
+            } else {
+                mainViewModel.spendCoins(15, onSuccess = {
+                    soundManager.playTap()
+                    gameViewModel.onEvent(GameEvent.UndoMove)
+                }, onFailure = {
+                    soundManager.playError()
+                    Toast.makeText(context, "Not enough coins!", Toast.LENGTH_SHORT)
+                        .show()
+                })
+            }
+        },
+        modifier = modifier
+    )
+}
+
+@Composable
+fun GameplayContent(
+    gameState: GameState,
+    coins: Int,
+    hints: Int,
+    undos: Int,
+    onNavigateBack: () -> Unit,
+    onNavigateToShop: () -> Unit,
+    onCellClicked: (Int) -> Unit,
+    onUseHint: () -> Unit,
+    onUseUndo: () -> Unit,
+    modifier: Modifier = Modifier
+) {
     Scaffold(
         topBar = {
             MainTopBar(
-                coins = userPreferences.coins,
+                coins = coins,
                 title = "GAME",
-                onBackClick = onNavigateBack
+                onBackClick = onNavigateBack,
+                onShopClick = onNavigateToShop
             )
         },
         containerColor = MaterialTheme.colorScheme.background,
@@ -126,6 +224,7 @@ fun GameplayScreen(
             modifier = Modifier
                 .padding(innerPadding)
                 .fillMaxSize()
+                .navigationBarsPadding()
                 .padding(horizontal = 16.dp, vertical = 8.dp),
             verticalArrangement = Arrangement.SpaceBetween,
             horizontalAlignment = Alignment.CenterHorizontally
@@ -146,15 +245,7 @@ fun GameplayScreen(
             ) {
                 TicTacToeBoard(
                     gameState = gameState,
-                    onCellClicked = { index ->
-                        val cell = gameState.board[index]
-                        if (cell == Player.NONE && !gameState.isAiTurn && gameState.result == GameResult.NONE) {
-                            soundManager.playTap()
-                        } else if (cell != Player.NONE && gameState.result == GameResult.NONE) {
-                            soundManager.playError()
-                        }
-                        gameViewModel.onEvent(GameEvent.PlayMove(index))
-                    }
+                    onCellClicked = onCellClicked
                 )
             }
 
@@ -169,57 +260,19 @@ fun GameplayScreen(
                     PowerUpButton(
                         icon = Icons.Rounded.Lightbulb,
                         cost = 30,
+                        count = hints,
                         onClick = {
                             if (gameState.isAiTurn || gameState.result != GameResult.NONE) return@PowerUpButton
-                            if (userPreferences.hints > 0) {
-                                mainViewModel.consumeHint(
-                                    onSuccess = {
-                                        soundManager.playTap()
-                                        gameViewModel.onEvent(GameEvent.RequestHint)
-                                        dailyChallengesViewModel.onEvent(DailyChallengesEvent.IncrementStrategistProgress)
-                                    },
-                                    onFailure = {
-                                        soundManager.playError()
-                                    }
-                                )
-                            } else {
-                                mainViewModel.spendCoins(30, onSuccess = {
-                                    soundManager.playTap()
-                                    gameViewModel.onEvent(GameEvent.RequestHint)
-                                    dailyChallengesViewModel.onEvent(DailyChallengesEvent.IncrementStrategistProgress)
-                                }, onFailure = {
-                                    soundManager.playError()
-                                    Toast.makeText(context, "Not enough coins!", Toast.LENGTH_SHORT)
-                                        .show()
-                                })
-                            }
+                            onUseHint()
                         }
                     )
                     PowerUpButton(
                         icon = Icons.Rounded.History,
                         cost = 15,
+                        count = undos,
                         onClick = {
                             if (gameState.isAiTurn || gameState.result != GameResult.NONE || gameState.history.isEmpty()) return@PowerUpButton
-                            if (userPreferences.undos > 0) {
-                                mainViewModel.consumeUndo(
-                                    onSuccess = {
-                                        soundManager.playTap()
-                                        gameViewModel.onEvent(GameEvent.UndoMove)
-                                    },
-                                    onFailure = {
-                                        soundManager.playError()
-                                    }
-                                )
-                            } else {
-                                mainViewModel.spendCoins(15, onSuccess = {
-                                    soundManager.playTap()
-                                    gameViewModel.onEvent(GameEvent.UndoMove)
-                                }, onFailure = {
-                                    soundManager.playError()
-                                    Toast.makeText(context, "Not enough coins!", Toast.LENGTH_SHORT)
-                                        .show()
-                                })
-                            }
+                            onUseUndo()
                         }
                     )
                 }
@@ -240,7 +293,7 @@ fun GameplayScreen(
 }
 
 @Composable
-fun PowerUpButton(icon: ImageVector, cost: Int, onClick: () -> Unit) {
+fun PowerUpButton(icon: ImageVector, cost: Int, count: Int, onClick: () -> Unit) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Box(
             modifier = Modifier
@@ -252,6 +305,22 @@ fun PowerUpButton(icon: ImageVector, cost: Int, onClick: () -> Unit) {
             contentAlignment = Alignment.Center
         ) {
             Icon(icon, contentDescription = null, tint = NeonCyan, modifier = Modifier.size(24.dp))
+            if (count > 0) {
+                Box(
+                    modifier = Modifier
+                        .align(Alignment.TopEnd)
+                        .size(18.dp)
+                        .background(NeonMagenta, CircleShape),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "$count",
+                        color = Color.White,
+                        fontSize = 8.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+            }
         }
         Spacer(modifier = Modifier.height(4.dp))
         NeonText(text = "$cost", color = NeonYellow, fontSize = 12, fontWeight = FontWeight.Bold)
@@ -380,6 +449,46 @@ fun CellIcon(player: Player) {
                 contentDescription = "O",
                 modifier = Modifier.fillMaxSize(0.7f),
                 tint = NeonMagenta
+            )
+        }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun GameplayScreenPreview() {
+    CompositionLocalProvider(LocalSoundManager provides SoundManager(null)) {
+        AppTheme {
+            GameplayContent(
+                gameState = GameState(difficulty = Difficulty.EASY, board = List(9) { Player.NONE }),
+                coins = 300,
+                hints = 2,
+                undos = 5,
+                onNavigateBack = {},
+                onNavigateToShop = {},
+                onCellClicked = {},
+                onUseHint = {},
+                onUseUndo = {}
+            )
+        }
+    }
+}
+
+@Preview(showBackground = true, name = "Large Board")
+@Composable
+fun GameplayScreenLargePreview() {
+    CompositionLocalProvider(LocalSoundManager provides SoundManager(null)) {
+        AppTheme {
+            GameplayContent(
+                gameState = GameState(difficulty = Difficulty.VERY_HARD, board = List(225) { Player.NONE }),
+                coins = 300,
+                hints = 0,
+                undos = 0,
+                onNavigateBack = {},
+                onNavigateToShop = {},
+                onCellClicked = {},
+                onUseHint = {},
+                onUseUndo = {}
             )
         }
     }

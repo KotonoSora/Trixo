@@ -6,6 +6,7 @@ import kotlinx.coroutines.flow.Flow
 interface UserPreferencesRepository {
     val userPreferencesFlow: Flow<UserPreferences>
     suspend fun updateCoins(coins: Int)
+    suspend fun updateHighScore(score: Int): Boolean
     suspend fun addCoins(amount: Int)
     suspend fun addHints(amount: Int)
     suspend fun consumeHint(): Boolean

@@ -27,7 +27,12 @@ class SoundManager(context: Context? = null) {
                 "tap" to soundPool.load(context, R.raw.tap, 1),
                 "error" to soundPool.load(context, R.raw.error, 1),
                 "win" to soundPool.load(context, R.raw.win, 1),
-                "lose" to soundPool.load(context, R.raw.lose, 1)
+                "lose" to soundPool.load(context, R.raw.lose, 1),
+                "milestone_100" to soundPool.load(context, R.raw.milestone_100, 1),
+                "milestone_200" to soundPool.load(context, R.raw.milestone_200, 1),
+                "milestone_300" to soundPool.load(context, R.raw.milestone_300, 1),
+                "milestone_400" to soundPool.load(context, R.raw.milestone_400, 1),
+                "milestone_500" to soundPool.load(context, R.raw.milestone_500, 1)
             )
         } else {
             soundPool = null
@@ -39,6 +44,18 @@ class SoundManager(context: Context? = null) {
     fun playError() = play("error")
     fun playWin() = play("win")
     fun playLose() = play("lose")
+    
+    fun playMilestone(score: Int) {
+        val milestone = when {
+            score >= 500 -> "milestone_500"
+            score >= 400 -> "milestone_400"
+            score >= 300 -> "milestone_300"
+            score >= 200 -> "milestone_200"
+            score >= 100 -> "milestone_100"
+            else -> return
+        }
+        play(milestone)
+    }
 
     private fun play(name: String) {
         if (!soundEnabled) return

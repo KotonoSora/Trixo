@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -28,14 +29,18 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.kotonosora.tictactoe.audio.LocalSoundManager
+import com.kotonosora.tictactoe.audio.SoundManager
 import com.kotonosora.tictactoe.ui.MainViewModel
 import com.kotonosora.tictactoe.ui.components.NeonText
 import com.kotonosora.tictactoe.ui.components.MainTopBar
 import com.kotonosora.tictactoe.ui.theme.NeonCyan
 import com.kotonosora.tictactoe.ui.theme.NeonMagenta
 import com.kotonosora.tictactoe.ui.theme.NeonYellow
+import com.kotonosora.tictactoe.ui.theme.AppTheme
+import androidx.compose.runtime.CompositionLocalProvider
 
 @Composable
 fun SettingsScreen(
@@ -46,10 +51,37 @@ fun SettingsScreen(
     val userPreferences by mainViewModel.userPreferences.collectAsState()
     val soundManager = LocalSoundManager.current
 
+    SettingsScreenContent(
+        coins = userPreferences.coins,
+        soundEnabled = userPreferences.soundEnabled,
+        musicEnabled = userPreferences.musicEnabled,
+        onSoundEnabledChange = {
+            soundManager.playTap()
+            mainViewModel.setSoundEnabled(it)
+        },
+        onMusicEnabledChange = {
+            soundManager.playTap()
+            mainViewModel.setMusicEnabled(it)
+        },
+        onNavigateBack = onNavigateBack,
+        modifier = modifier
+    )
+}
+
+@Composable
+fun SettingsScreenContent(
+    coins: Int,
+    soundEnabled: Boolean,
+    musicEnabled: Boolean,
+    onSoundEnabledChange: (Boolean) -> Unit,
+    onMusicEnabledChange: (Boolean) -> Unit,
+    onNavigateBack: () -> Unit,
+    modifier: Modifier = Modifier
+) {
     Scaffold(
         topBar = {
             MainTopBar(
-                coins = userPreferences.coins,
+                coins = coins,
                 title = "OPTIONS",
                 onBackClick = onNavigateBack
             )
@@ -61,6 +93,7 @@ fun SettingsScreen(
             modifier = Modifier
                 .padding(innerPadding)
                 .fillMaxSize()
+                .navigationBarsPadding()
                 .padding(24.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
@@ -94,11 +127,8 @@ fun SettingsScreen(
                             NeonText("SOUND FX", color = NeonMagenta, fontWeight = FontWeight.Bold)
                         }
                         Switch(
-                            checked = userPreferences.soundEnabled,
-                            onCheckedChange = {
-                                soundManager.playTap()
-                                mainViewModel.setSoundEnabled(it)
-                            },
+                            checked = soundEnabled,
+                            onCheckedChange = onSoundEnabledChange,
                             colors = SwitchDefaults.colors(
                                 checkedThumbColor = NeonCyan,
                                 checkedTrackColor = NeonCyan.copy(alpha = 0.5f),
@@ -125,11 +155,8 @@ fun SettingsScreen(
                             NeonText("MUSIC", color = NeonYellow, fontWeight = FontWeight.Bold)
                         }
                         Switch(
-                            checked = userPreferences.musicEnabled,
-                            onCheckedChange = {
-                                soundManager.playTap()
-                                mainViewModel.setMusicEnabled(it)
-                            },
+                            checked = musicEnabled,
+                            onCheckedChange = onMusicEnabledChange,
                             colors = SwitchDefaults.colors(
                                 checkedThumbColor = NeonCyan,
                                 checkedTrackColor = NeonCyan.copy(alpha = 0.5f),
@@ -140,6 +167,23 @@ fun SettingsScreen(
                     }
                 }
             }
+        }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun SettingsScreenPreview() {
+    CompositionLocalProvider(LocalSoundManager provides SoundManager(null)) {
+        AppTheme {
+            SettingsScreenContent(
+                coins = 300,
+                soundEnabled = true,
+                musicEnabled = false,
+                onSoundEnabledChange = {},
+                onMusicEnabledChange = {},
+                onNavigateBack = {}
+            )
         }
     }
 }

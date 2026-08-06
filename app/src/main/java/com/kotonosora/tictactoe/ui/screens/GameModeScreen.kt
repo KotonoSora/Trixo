@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -25,6 +26,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.kotonosora.tictactoe.domain.Difficulty
 import com.kotonosora.tictactoe.domain.GameEvent
@@ -37,6 +39,7 @@ import com.kotonosora.tictactoe.ui.theme.NeonCyan
 import com.kotonosora.tictactoe.ui.theme.NeonGreen
 import com.kotonosora.tictactoe.ui.theme.NeonMagenta
 import com.kotonosora.tictactoe.ui.theme.NeonYellow
+import com.kotonosora.tictactoe.ui.theme.AppTheme
 
 @Composable
 fun GameModeScreen(
@@ -48,10 +51,28 @@ fun GameModeScreen(
 ) {
     val userPreferences by mainViewModel.userPreferences.collectAsState()
 
+    GameModeScreenContent(
+        coins = userPreferences.coins,
+        onNavigateBack = onNavigateBack,
+        onDifficultySelected = { difficulty, isPvP ->
+            gameViewModel.onEvent(GameEvent.ResetGame(difficulty, isPvP = isPvP))
+            onNavigateToGameplay()
+        },
+        modifier = modifier
+    )
+}
+
+@Composable
+fun GameModeScreenContent(
+    coins: Int,
+    onNavigateBack: () -> Unit,
+    onDifficultySelected: (Difficulty, Boolean) -> Unit,
+    modifier: Modifier = Modifier
+) {
     Scaffold(
         topBar = {
             MainTopBar(
-                coins = userPreferences.coins,
+                coins = coins,
                 onBackClick = onNavigateBack
             )
         },
@@ -91,10 +112,7 @@ fun GameModeScreen(
                     text = "EASY (3x3)",
                     condition = "WIN: 3 IN A ROW",
                     color = NeonGreen,
-                    onClick = {
-                        gameViewModel.onEvent(GameEvent.ResetGame(Difficulty.EASY, isPvP = false))
-                        onNavigateToGameplay()
-                    }
+                    onClick = { onDifficultySelected(Difficulty.EASY, false) }
                 )
 
                 Spacer(modifier = Modifier.height(12.dp))
@@ -103,10 +121,7 @@ fun GameModeScreen(
                     text = "MEDIUM (9x9)",
                     condition = "WIN: 4 IN A ROW",
                     color = NeonCyan,
-                    onClick = {
-                        gameViewModel.onEvent(GameEvent.ResetGame(Difficulty.MEDIUM, isPvP = false))
-                        onNavigateToGameplay()
-                    }
+                    onClick = { onDifficultySelected(Difficulty.MEDIUM, false) }
                 )
 
                 Spacer(modifier = Modifier.height(12.dp))
@@ -115,10 +130,7 @@ fun GameModeScreen(
                     text = "HARD (12x12)",
                     condition = "WIN: 5 IN A ROW",
                     color = NeonYellow,
-                    onClick = {
-                        gameViewModel.onEvent(GameEvent.ResetGame(Difficulty.HARD, isPvP = false))
-                        onNavigateToGameplay()
-                    }
+                    onClick = { onDifficultySelected(Difficulty.HARD, false) }
                 )
 
                 Spacer(modifier = Modifier.height(12.dp))
@@ -127,15 +139,7 @@ fun GameModeScreen(
                     text = "INSANE (15x15)",
                     condition = "WIN: 6 IN A ROW",
                     color = NeonMagenta,
-                    onClick = {
-                        gameViewModel.onEvent(
-                            GameEvent.ResetGame(
-                                Difficulty.VERY_HARD,
-                                isPvP = false
-                            )
-                        )
-                        onNavigateToGameplay()
-                    }
+                    onClick = { onDifficultySelected(Difficulty.VERY_HARD, false) }
                 )
             }
 
@@ -164,20 +168,24 @@ fun GameModeScreen(
                     text = "LOCAL BATTLE (15x15)",
                     condition = "WIN: 6 IN A ROW",
                     color = NeonMagenta,
-                    onClick = {
-                        gameViewModel.onEvent(
-                            GameEvent.ResetGame(
-                                Difficulty.VERY_HARD,
-                                isPvP = true
-                            )
-                        )
-                        onNavigateToGameplay()
-                    }
+                    onClick = { onDifficultySelected(Difficulty.VERY_HARD, true) }
                 )
             }
 
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(24.dp).navigationBarsPadding())
         }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun GameModeScreenPreview() {
+    AppTheme {
+        GameModeScreenContent(
+            coins = 300,
+            onNavigateBack = {},
+            onDifficultySelected = { _, _ -> }
+        )
     }
 }
 

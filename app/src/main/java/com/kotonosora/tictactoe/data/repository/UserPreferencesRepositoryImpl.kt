@@ -15,6 +15,7 @@ class UserPreferencesRepositoryImpl(private val dataStore: DataStore<Preferences
     UserPreferencesRepository {
     private object PreferencesKeys {
         val COINS = intPreferencesKey("coins")
+        val HIGH_SCORE = intPreferencesKey("high_score")
         val HINTS = intPreferencesKey("hints")
         val UNDOS = intPreferencesKey("undos")
         val GAMES_PLAYED = intPreferencesKey("games_played")
@@ -28,6 +29,7 @@ class UserPreferencesRepositoryImpl(private val dataStore: DataStore<Preferences
 
     override val userPreferencesFlow: Flow<UserPreferences> = dataStore.data.map { preferences ->
         val coins = preferences[PreferencesKeys.COINS] ?: 300
+        val highScore = preferences[PreferencesKeys.HIGH_SCORE] ?: 0
         val hints = preferences[PreferencesKeys.HINTS] ?: 0
         val undos = preferences[PreferencesKeys.UNDOS] ?: 0
         val gamesPlayed = preferences[PreferencesKeys.GAMES_PLAYED] ?: 0
@@ -59,7 +61,8 @@ class UserPreferencesRepositoryImpl(private val dataStore: DataStore<Preferences
             musicEnabled = musicEnabled,
             lastChallengeResetTime = lastResetTime,
             challengeProgress = challengeProgress,
-            challengeClaimed = challengeClaimed
+            challengeClaimed = challengeClaimed,
+            highScore = highScore
         )
     }
 
@@ -67,6 +70,18 @@ class UserPreferencesRepositoryImpl(private val dataStore: DataStore<Preferences
         dataStore.edit { preferences ->
             preferences[PreferencesKeys.COINS] = coins
         }
+    }
+
+    override suspend fun updateHighScore(score: Int): Boolean {
+        var isNewHigh = false
+        dataStore.edit { preferences ->
+            val current = preferences[PreferencesKeys.HIGH_SCORE] ?: 0
+            if (score > current) {
+                preferences[PreferencesKeys.HIGH_SCORE] = score
+                isNewHigh = true
+            }
+        }
+        return isNewHigh
     }
 
     override suspend fun addCoins(amount: Int) {

@@ -5,6 +5,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -26,9 +27,11 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.kotonosora.tictactoe.ui.theme.NeonCyan
 import com.kotonosora.tictactoe.ui.theme.NeonYellow
+import com.kotonosora.tictactoe.ui.theme.AppTheme
 
 @Composable
 fun MainTopBar(
@@ -121,6 +124,18 @@ fun CoinCapsule(
                 fontSize = 12,
                 fontWeight = FontWeight.Bold
             )
+        }
+    }
+}
+
+@Preview(showBackground = true, backgroundColor = 0xFF000000)
+@Composable
+fun MainTopBarPreview() {
+    AppTheme {
+        Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+            MainTopBar(coins = 500)
+            MainTopBar(coins = 1200, title = "SCREEN TITLE", onBackClick = {})
+            MainTopBar(coins = 2500, title = "SHOP", onBackClick = {}, onShopClick = {})
         }
     }
 }

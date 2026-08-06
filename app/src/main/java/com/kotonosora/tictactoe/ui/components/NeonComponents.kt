@@ -21,11 +21,19 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.kotonosora.tictactoe.audio.LocalSoundManager
 import com.kotonosora.tictactoe.ui.theme.NeonCyan
+import com.kotonosora.tictactoe.ui.theme.NeonMagenta
+import com.kotonosora.tictactoe.ui.theme.NeonYellow
 import com.kotonosora.tictactoe.ui.theme.PressStart2PFontFamily
+import com.kotonosora.tictactoe.ui.theme.AppTheme
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.PlayArrow
 
 
 @Composable
@@ -147,4 +155,34 @@ fun NeonText(
         maxLines = maxLines,
         overflow = overflow
     )
+}
+
+@Preview(showBackground = true, backgroundColor = 0xFF000000)
+@Composable
+fun NeonComponentsPreview() {
+    AppTheme {
+        Column(
+            modifier = Modifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            NeonTitle("TITLE")
+            NeonTitle("MAGENTA", color = NeonMagenta, fontSize = 24)
+            
+            NeonText("Regular text")
+            NeonText("Yellow text", color = NeonYellow, fontWeight = FontWeight.Bold)
+            
+            NeonButton(text = "BUTTON", onClick = {})
+            NeonButton(
+                text = "WITH ICON",
+                onClick = {},
+                icon = Icons.Rounded.PlayArrow,
+                color = NeonYellow
+            )
+            
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                NeonIconButton(icon = Icons.Rounded.PlayArrow, onClick = {})
+                NeonIconButton(icon = Icons.Rounded.PlayArrow, onClick = {}, tint = NeonMagenta)
+            }
+        }
+    }
 }

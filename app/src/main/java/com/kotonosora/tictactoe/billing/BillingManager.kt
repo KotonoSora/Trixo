@@ -28,6 +28,7 @@ data class StoreProduct(
     val productId: String,
     val title: String,
     val price: String,
+    val description: String = "",
     val originalDetails: ProductDetails? = null
 )
 
@@ -53,6 +54,9 @@ class BillingManager(
     private val _products = MutableStateFlow<List<StoreProduct>>(emptyList())
     val products: StateFlow<List<StoreProduct>> = _products.asStateFlow()
 
+    private val _error = MutableStateFlow<String?>(null)
+    val error: StateFlow<String?> = _error.asStateFlow()
+
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
 
     companion object {
@@ -75,12 +79,14 @@ class BillingManager(
         startConnection()
     }
 
-    private fun startConnection() {
+    fun startConnection() {
         billingClient.startConnection(object : BillingClientStateListener {
             override fun onBillingSetupFinished(billingResult: BillingResult) {
                 if (billingResult.responseCode == BillingClient.BillingResponseCode.OK) {
+                    _error.value = null
                     queryProducts()
                 } else {
+                    _error.value = "Store currently unavailable"
                     // Fallback to mock data if connection fails in debug mode
                     if (isDebug) {
                         loadMockProducts()
@@ -89,7 +95,7 @@ class BillingManager(
             }
 
             override fun onBillingServiceDisconnected() {
-                // In a production app, consider implementing a retry policy here.
+                _error.value = "Store currently unavailable"
             }
         })
     }
@@ -119,15 +125,22 @@ class BillingManager(
                             title = product.name,
                             price = product.oneTimePurchaseOfferDetails?.formattedPrice
                                 ?: "Unknown",
+                            description = product.description,
                             originalDetails = product
                         )
                     }
                     _products.value = sortedProducts
-                } else if (isDebug) {
-                    // No real products found in Play Store, use mocks in debug mode
-                    loadMockProducts()
+                    _error.value = null
+                } else {
+                    if (isDebug) {
+                        // No real products found in Play Store, use mocks in debug mode
+                        loadMockProducts()
+                    } else {
+                        _products.value = emptyList()
+                    }
                 }
             } else {
+                _error.value = "Store currently unavailable"
                 if (isDebug) {
                     loadMockProducts()
                 }
@@ -151,10 +164,12 @@ class BillingManager(
                     "coins_3500" -> "$7.99"
                     "coins_4000" -> "$9.99"
                     else -> "Unknown"
-                }
+                },
+                description = "A pack of $coins coins used to unlock powerful boosts like Extra Time, Hint, and Undo."
             )
         }.sortedBy { COIN_PACKS[it.productId] ?: 0 }
         _products.value = mockProducts
+        _error.value = null
     }
 
     fun launchBillingFlow(activity: Activity, product: StoreProduct) {

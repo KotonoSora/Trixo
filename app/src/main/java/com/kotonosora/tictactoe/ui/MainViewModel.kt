@@ -94,8 +94,12 @@ class MainViewModel(
         }
     }
 
-    fun recordGameFinished(won: Boolean, score: Int = 0, reward: Int = 0) {
+    fun recordGameFinished(won: Boolean, score: Int = 0, reward: Int = 0, onNewHighScore: () -> Unit = {}) {
         viewModelScope.launch {
+            val isNewHigh = repository.updateHighScore(score)
+            if (isNewHigh) {
+                onNewHighScore()
+            }
             recordGameFinishedUseCase(won, score, reward)
         }
     }

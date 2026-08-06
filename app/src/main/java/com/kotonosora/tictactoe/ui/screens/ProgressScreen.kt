@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -27,6 +28,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.kotonosora.tictactoe.ui.MainViewModel
 import com.kotonosora.tictactoe.ui.components.NeonText
@@ -35,6 +37,7 @@ import com.kotonosora.tictactoe.ui.components.MainTopBar
 import com.kotonosora.tictactoe.ui.theme.NeonCyan
 import com.kotonosora.tictactoe.ui.theme.NeonMagenta
 import com.kotonosora.tictactoe.ui.theme.NeonYellow
+import com.kotonosora.tictactoe.ui.theme.AppTheme
 
 @Composable
 fun ProgressScreen(
@@ -44,14 +47,31 @@ fun ProgressScreen(
 ) {
     val userPreferences by mainViewModel.userPreferences.collectAsState()
 
-    val gamesPlayed = userPreferences.gamesPlayed
-    val gamesWon = userPreferences.gamesWon
+    ProgressScreenContent(
+        coins = userPreferences.coins,
+        highScore = userPreferences.highScore,
+        gamesPlayed = userPreferences.gamesPlayed,
+        gamesWon = userPreferences.gamesWon,
+        onNavigateBack = onNavigateBack,
+        modifier = modifier
+    )
+}
+
+@Composable
+fun ProgressScreenContent(
+    coins: Int,
+    highScore: Int,
+    gamesPlayed: Int,
+    gamesWon: Int,
+    onNavigateBack: () -> Unit,
+    modifier: Modifier = Modifier
+) {
     val winRate = if (gamesPlayed > 0) gamesWon.toFloat() / gamesPlayed else 0f
 
     Scaffold(
         topBar = {
             MainTopBar(
-                coins = userPreferences.coins,
+                coins = coins,
                 title = "STATS",
                 onBackClick = onNavigateBack
             )
@@ -63,10 +83,30 @@ fun ProgressScreen(
             modifier = Modifier
                 .padding(innerPadding)
                 .fillMaxSize()
+                .navigationBarsPadding()
                 .padding(24.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Spacer(modifier = Modifier.height(16.dp))
+
+            // High Score Neon Card
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(24.dp))
+                    .background(NeonYellow.copy(alpha = 0.05f))
+                    .border(2.dp, NeonYellow, RoundedCornerShape(24.dp))
+                    .padding(24.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    NeonText("HIGH SCORE", color = NeonYellow, fontWeight = FontWeight.Bold)
+                    Spacer(modifier = Modifier.height(16.dp))
+                    NeonTitle("$highScore", fontSize = 48, color = NeonYellow)
+                }
+            }
+
+            Spacer(modifier = Modifier.height(24.dp))
 
             // Win Rate Neon Card
             Box(
@@ -149,5 +189,19 @@ fun ProgressScreen(
                 }
             }
         }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun ProgressScreenPreview() {
+    AppTheme {
+        ProgressScreenContent(
+            coins = 300,
+            highScore = 2500,
+            gamesPlayed = 50,
+            gamesWon = 32,
+            onNavigateBack = {}
+        )
     }
 }

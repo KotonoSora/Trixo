@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -110,7 +111,7 @@ fun LeaderboardScreenContent(
 
                 LazyColumn(
                     verticalArrangement = Arrangement.spacedBy(8.dp),
-                    modifier = Modifier.fillMaxSize()
+                    modifier = Modifier.fillMaxSize().navigationBarsPadding()
                 ) {
                     items(history) { entry ->
                         LeaderboardItem(entry)
@@ -137,16 +138,21 @@ fun LeaderboardItem(entry: GameHistory) {
             verticalAlignment = Alignment.CenterVertically
         ) {
             Column(modifier = Modifier.weight(1.5f)) {
+                val parts = entry.dateTime.split(" ")
+                val date = parts.getOrNull(0) ?: ""
+                val time = parts.getOrNull(1) ?: ""
                 NeonText(
-                    text = entry.dateTime.split(" ")[0],
+                    text = date,
                     color = Color.White,
                     fontSize = 11
                 )
-                NeonText(
-                    text = entry.dateTime.split(" ")[1],
-                    color = Color.Gray,
-                    fontSize = 9
-                )
+                if (time.isNotEmpty()) {
+                    NeonText(
+                        text = time,
+                        color = Color.Gray,
+                        fontSize = 9
+                    )
+                }
             }
 
             NeonText(

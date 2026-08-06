@@ -2,6 +2,7 @@ package com.kotonosora.tictactoe.domain.model
 
 data class UserPreferences(
     val coins: Int = 300,
+    val highScore: Int = 0,
     val hints: Int = 0,
     val undos: Int = 0,
     val gamesPlayed: Int = 0,

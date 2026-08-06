@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -14,9 +15,11 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.tooling.preview.Preview
 import com.kotonosora.tictactoe.ui.MainViewModel
 import com.kotonosora.tictactoe.ui.components.NeonText
 import com.kotonosora.tictactoe.ui.components.MainTopBar
+import com.kotonosora.tictactoe.ui.theme.AppTheme
 
 @Composable
 fun HelpScreen(
@@ -26,10 +29,23 @@ fun HelpScreen(
 ) {
     val userPreferences by mainViewModel.userPreferences.collectAsState()
 
+    HelpScreenContent(
+        coins = userPreferences.coins,
+        onNavigateBack = onNavigateBack,
+        modifier = modifier
+    )
+}
+
+@Composable
+fun HelpScreenContent(
+    coins: Int,
+    onNavigateBack: () -> Unit,
+    modifier: Modifier = Modifier
+) {
     Scaffold(
         topBar = {
             MainTopBar(
-                coins = userPreferences.coins,
+                coins = coins,
                 title = "HELP",
                 onBackClick = onNavigateBack
             )
@@ -41,6 +57,7 @@ fun HelpScreen(
             modifier = Modifier
                 .padding(innerPadding)
                 .fillMaxSize()
+                .navigationBarsPadding()
                 .padding(24.dp)
                 .verticalScroll(rememberScrollState())
         ) {
@@ -77,5 +94,16 @@ fun HelpScreen(
                 fontSize = 14
             )
         }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun HelpScreenPreview() {
+    AppTheme {
+        HelpScreenContent(
+            coins = 300,
+            onNavigateBack = {}
+        )
     }
 }

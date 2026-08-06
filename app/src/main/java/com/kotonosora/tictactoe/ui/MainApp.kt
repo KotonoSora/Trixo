@@ -74,6 +74,7 @@ fun MainApp(
                         popUpTo(AppDestinations.GAME_MODE) { inclusive = false }
                     }
                 },
+                onNavigateToShop = { navController.navigate(AppDestinations.COIN_SHOP) },
                 onNavigateBack = { navController.popBackStack() }
             )
         }
@@ -126,7 +127,8 @@ fun MainApp(
             DailyChallengesScreen(
                 mainViewModel = viewModel,
                 dailyChallengesViewModel = dailyChallengesViewModel,
-                onNavigateBack = { navController.popBackStack() }
+                onNavigateBack = { navController.popBackStack() },
+                onNavigateToPlay = { navController.navigate(AppDestinations.GAME_MODE) }
             )
         }
 

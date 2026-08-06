@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -55,6 +56,7 @@ fun DailyChallengesScreen(
     mainViewModel: MainViewModel,
     dailyChallengesViewModel: DailyChallengesViewModel,
     onNavigateBack: () -> Unit,
+    onNavigateToPlay: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val userPrefs by mainViewModel.userPreferences.collectAsState()
@@ -70,6 +72,7 @@ fun DailyChallengesScreen(
                 }
             )
         },
+        onPlay = onNavigateToPlay,
         onNavigateBack = onNavigateBack,
         modifier = modifier
     )
@@ -80,6 +83,7 @@ fun DailyChallengesContent(
     coins: Int,
     challenges: List<DailyChallenge>,
     onClaimReward: (String) -> Unit,
+    onPlay: () -> Unit,
     onNavigateBack: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -98,13 +102,15 @@ fun DailyChallengesContent(
             modifier = Modifier
                 .padding(innerPadding)
                 .fillMaxSize()
+                .navigationBarsPadding()
                 .padding(24.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             items(challenges, key = { it.id }) { challenge ->
                 ChallengeItem(
                     challenge = challenge,
-                    onClaimReward = { onClaimReward(challenge.id) }
+                    onClaimReward = { onClaimReward(challenge.id) },
+                    onPlay = onPlay
                 )
             }
         }
@@ -114,7 +120,8 @@ fun DailyChallengesContent(
 @Composable
 fun ChallengeItem(
     challenge: DailyChallenge,
-    onClaimReward: () -> Unit
+    onClaimReward: () -> Unit,
+    onPlay: () -> Unit
 ) {
     val progress = challenge.progress.toFloat() / challenge.total
 
@@ -181,6 +188,24 @@ fun ChallengeItem(
                             fontWeight = FontWeight.Bold
                         )
                     }
+                } else {
+                    TextButton(
+                        onClick = onPlay,
+                        colors = ButtonDefaults.textButtonColors(
+                            containerColor = challenge.color.copy(alpha = 0.1f),
+                            contentColor = challenge.color
+                        ),
+                        modifier = Modifier
+                            .border(1.dp, challenge.color.copy(alpha = 0.5f), RoundedCornerShape(8.dp))
+                            .height(36.dp)
+                    ) {
+                        Text(
+                            "PLAY",
+                            fontFamily = PressStart2PFontFamily,
+                            fontSize = 10.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
                 }
             }
             Spacer(modifier = Modifier.height(8.dp))
@@ -228,6 +253,7 @@ fun DailyChallengesPreview() {
                 )
             ),
             onClaimReward = {},
+            onPlay = {},
             onNavigateBack = {}
         )
     }
