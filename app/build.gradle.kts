@@ -7,11 +7,11 @@ plugins {
 }
 
 configure<ApplicationExtension> {
-    namespace = "com.kotonosora.blitzxo"
+    namespace = "com.kotonosora.tictactoe"
     compileSdk = 37
 
     defaultConfig {
-        applicationId = "com.kotonosora.blitzxo"
+        applicationId = "com.kotonosora.tictactoe"
         minSdk = 30
         versionCode = 3
         versionName = "3.0.0"
