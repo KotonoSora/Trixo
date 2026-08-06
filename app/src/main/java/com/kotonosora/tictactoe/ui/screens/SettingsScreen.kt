@@ -10,15 +10,11 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.VolumeUp
-import androidx.compose.material.icons.rounded.MusicNote
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.runtime.Composable
@@ -34,138 +30,82 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.kotonosora.tictactoe.audio.LocalSoundManager
 import com.kotonosora.tictactoe.audio.SoundManager
-import com.kotonosora.tictactoe.ui.components.MainTopBar
 import com.kotonosora.tictactoe.ui.components.NeonText
 import com.kotonosora.tictactoe.ui.theme.AppTheme
 import com.kotonosora.tictactoe.ui.theme.NeonCyan
 import com.kotonosora.tictactoe.ui.theme.NeonMagenta
-import com.kotonosora.tictactoe.ui.theme.NeonYellow
 import com.kotonosora.tictactoe.ui.viewmodels.MainEvent
 import com.kotonosora.tictactoe.ui.viewmodels.MainViewModel
 
 @Composable
 fun SettingsScreen(
     mainViewModel: MainViewModel,
-    onNavigateBack: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val uiState by mainViewModel.uiState.collectAsState()
     val soundManager = LocalSoundManager.current
 
     SettingsScreenContent(
-        coins = uiState.userPreferences.coins,
         soundEnabled = uiState.userPreferences.soundEnabled,
-        musicEnabled = uiState.userPreferences.musicEnabled,
         onSoundEnabledChange = {
             soundManager.playTap()
             mainViewModel.onEvent(MainEvent.SetSoundEnabled(it))
         },
-        onMusicEnabledChange = {
-            soundManager.playTap()
-            mainViewModel.onEvent(MainEvent.SetMusicEnabled(it))
-        },
-        onNavigateBack = onNavigateBack,
         modifier = modifier
     )
 }
 
 @Composable
 fun SettingsScreenContent(
-    coins: Int,
     soundEnabled: Boolean,
-    musicEnabled: Boolean,
     onSoundEnabledChange: (Boolean) -> Unit,
-    onMusicEnabledChange: (Boolean) -> Unit,
-    onNavigateBack: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Scaffold(
-        topBar = {
-            MainTopBar(
-                coins = coins,
-                title = "OPTIONS",
-                onBackClick = onNavigateBack
-            )
-        },
-        containerColor = MaterialTheme.colorScheme.background,
-        modifier = modifier.fillMaxSize()
-    ) { innerPadding ->
-        Column(
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .padding(24.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // Preferences Neon Box
+        Box(
             modifier = Modifier
-                .padding(innerPadding)
-                .fillMaxSize()
-                .navigationBarsPadding()
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(24.dp))
+                .background(NeonCyan.copy(alpha = 0.05f))
+                .border(2.dp, NeonCyan, RoundedCornerShape(24.dp))
                 .padding(24.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+            contentAlignment = Alignment.Center
         ) {
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Preferences Neon Box
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(24.dp))
-                    .background(NeonCyan.copy(alpha = 0.05f))
-                    .border(2.dp, NeonCyan, RoundedCornerShape(24.dp))
-                    .padding(24.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                Column(modifier = Modifier.fillMaxWidth()) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 12.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(
-                                Icons.AutoMirrored.Rounded.VolumeUp,
-                                contentDescription = "Sound",
-                                tint = NeonMagenta
-                            )
-                            Spacer(modifier = Modifier.padding(8.dp))
-                            NeonText("SOUND FX", color = NeonMagenta, fontWeight = FontWeight.Bold)
-                        }
-                        Switch(
-                            checked = soundEnabled,
-                            onCheckedChange = onSoundEnabledChange,
-                            colors = SwitchDefaults.colors(
-                                checkedThumbColor = NeonCyan,
-                                checkedTrackColor = NeonCyan.copy(alpha = 0.5f),
-                                uncheckedThumbColor = Color.Gray,
-                                uncheckedTrackColor = Color.DarkGray
-                            )
+            Column(modifier = Modifier.fillMaxWidth()) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 12.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            Icons.AutoMirrored.Rounded.VolumeUp,
+                            contentDescription = "Sound",
+                            tint = NeonMagenta
                         )
+                        Spacer(modifier = Modifier.padding(8.dp))
+                        NeonText("SOUND FX", color = NeonMagenta, fontWeight = FontWeight.Bold)
                     }
-
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 12.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(
-                                Icons.Rounded.MusicNote,
-                                contentDescription = "Music",
-                                tint = NeonYellow
-                            )
-                            Spacer(modifier = Modifier.padding(8.dp))
-                            NeonText("MUSIC", color = NeonYellow, fontWeight = FontWeight.Bold)
-                        }
-                        Switch(
-                            checked = musicEnabled,
-                            onCheckedChange = onMusicEnabledChange,
-                            colors = SwitchDefaults.colors(
-                                checkedThumbColor = NeonCyan,
-                                checkedTrackColor = NeonCyan.copy(alpha = 0.5f),
-                                uncheckedThumbColor = Color.Gray,
-                                uncheckedTrackColor = Color.DarkGray
-                            )
+                    Switch(
+                        checked = soundEnabled,
+                        onCheckedChange = onSoundEnabledChange,
+                        colors = SwitchDefaults.colors(
+                            checkedThumbColor = NeonCyan,
+                            checkedTrackColor = NeonCyan.copy(alpha = 0.5f),
+                            uncheckedThumbColor = Color.Gray,
+                            uncheckedTrackColor = Color.DarkGray
                         )
-                    }
+                    )
                 }
             }
         }
@@ -178,12 +118,8 @@ fun SettingsScreenPreview() {
     CompositionLocalProvider(LocalSoundManager provides SoundManager(null)) {
         AppTheme {
             SettingsScreenContent(
-                coins = 300,
                 soundEnabled = true,
-                musicEnabled = false,
-                onSoundEnabledChange = {},
-                onMusicEnabledChange = {},
-                onNavigateBack = {}
+                onSoundEnabledChange = {}
             )
         }
     }

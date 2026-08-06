@@ -8,13 +8,10 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -26,7 +23,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.kotonosora.tictactoe.domain.model.GameHistory
-import com.kotonosora.tictactoe.ui.components.MainTopBar
 import com.kotonosora.tictactoe.ui.components.NeonText
 import com.kotonosora.tictactoe.ui.components.NeonTitle
 import com.kotonosora.tictactoe.ui.theme.AppTheme
@@ -37,86 +33,67 @@ import com.kotonosora.tictactoe.ui.viewmodels.MainViewModel
 @Composable
 fun LeaderboardScreen(
     mainViewModel: MainViewModel,
-    onNavigateBack: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val uiState by mainViewModel.uiState.collectAsState()
 
     LeaderboardScreenContent(
-        coins = uiState.userPreferences.coins,
         history = uiState.gameHistory,
-        onNavigateBack = onNavigateBack,
         modifier = modifier
     )
 }
 
 @Composable
 fun LeaderboardScreenContent(
-    coins: Int,
     history: List<GameHistory>,
-    onNavigateBack: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Scaffold(
-        topBar = {
-            MainTopBar(
-                coins = coins,
-                title = "MY HISTORY",
-                onBackClick = onNavigateBack
-            )
-        },
-        containerColor = MaterialTheme.colorScheme.background,
-        modifier = modifier.fillMaxSize()
-    ) { innerPadding ->
-        Column(
-            modifier = Modifier
-                .padding(innerPadding)
-                .fillMaxSize()
-                .padding(24.dp)
-        ) {
-            if (history.isEmpty()) {
-                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    NeonText("NO GAMES PLAYED YET", color = Color.Gray, fontSize = 14)
-                }
-            } else {
-                // Header
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(bottom = 16.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    NeonText(
-                        "DATE & TIME",
-                        color = NeonCyan,
-                        fontSize = 12,
-                        modifier = Modifier.weight(1.5f)
-                    )
-                    NeonText(
-                        "SCORE",
-                        color = NeonCyan,
-                        fontSize = 12,
-                        modifier = Modifier.weight(1f),
-                        textAlign = TextAlign.Center
-                    )
-                    NeonText(
-                        "REWARD",
-                        color = NeonCyan,
-                        fontSize = 12,
-                        modifier = Modifier.weight(1f),
-                        textAlign = TextAlign.End
-                    )
-                }
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .padding(24.dp)
+    ) {
+        if (history.isEmpty()) {
+            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                NeonText("NO GAMES PLAYED YET", color = Color.Gray, fontSize = 14)
+            }
+        } else {
+            // Header
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 16.dp),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                NeonText(
+                    "DATE & TIME",
+                    color = NeonCyan,
+                    fontSize = 12,
+                    modifier = Modifier.weight(1.5f)
+                )
+                NeonText(
+                    "SCORE",
+                    color = NeonCyan,
+                    fontSize = 12,
+                    modifier = Modifier.weight(1f),
+                    textAlign = TextAlign.Center
+                )
+                NeonText(
+                    "REWARD",
+                    color = NeonCyan,
+                    fontSize = 12,
+                    modifier = Modifier.weight(1f),
+                    textAlign = TextAlign.End
+                )
+            }
 
-                LazyColumn(
-                    verticalArrangement = Arrangement.spacedBy(8.dp),
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .navigationBarsPadding()
-                ) {
-                    items(history) { entry ->
-                        LeaderboardItem(entry)
-                    }
+            LazyColumn(
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+                modifier = Modifier
+                    .fillMaxSize()
+            ) {
+                items(history) { entry ->
+                    LeaderboardItem(entry)
                 }
             }
         }
@@ -185,13 +162,11 @@ fun LeaderboardItem(entry: GameHistory) {
 fun LeaderboardScreenPreview() {
     AppTheme {
         LeaderboardScreenContent(
-            coins = 250,
             history = listOf(
                 GameHistory(1, "2023-10-27 14:30", 50, 1250),
                 GameHistory(2, "2023-10-26 10:15", 30, 1100),
                 GameHistory(3, "2023-10-25 18:45", 25, 950)
-            ),
-            onNavigateBack = {}
+            )
         )
     }
 }

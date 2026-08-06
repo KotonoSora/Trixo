@@ -1,5 +1,6 @@
 package com.kotonosora.tictactoe.ui
 
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -7,7 +8,6 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController
 import com.kotonosora.tictactoe.di.LocalAppContainer
 import com.kotonosora.tictactoe.ui.navigation.AppDestinations
 import com.kotonosora.tictactoe.ui.screens.CoinShopScreen
@@ -29,26 +29,23 @@ import com.kotonosora.tictactoe.ui.viewmodels.MainViewModel
 @Composable
 fun MainApp(
     viewModel: MainViewModel,
-    modifier: Modifier = Modifier,
-    navController: NavHostController = rememberNavController()
+    gameViewModel: GameViewModel,
+    navController: NavHostController,
+    modifier: Modifier = Modifier
 ) {
     val container = LocalAppContainer.current
     val factory = remember(container) { AppViewModelFactory(container) }
 
-    // Shared GameViewModel scoped to MainApp lifecycle
-    val gameViewModel: GameViewModel = viewModel(factory = factory)
     val dailyChallengesViewModel: DailyChallengesViewModel = viewModel(factory = factory)
 
     NavHost(
         navController = navController,
         startDestination = AppDestinations.HOME,
-        modifier = modifier
+        modifier = modifier.fillMaxSize()
     ) {
         composable(AppDestinations.HOME) {
             HomeScreen(
-                viewModel = viewModel,
                 onNavigateToGameMode = { navController.navigate(AppDestinations.GAME_MODE) },
-                onNavigateToCoinShop = { navController.navigate(AppDestinations.COIN_SHOP) },
                 onNavigateToSettings = { navController.navigate(AppDestinations.SETTINGS) },
                 onNavigateToDailyChallenges = { navController.navigate(AppDestinations.DAILY_CHALLENGES) },
                 onNavigateToLeaderboard = { navController.navigate(AppDestinations.LEADERBOARD) },
@@ -59,8 +56,6 @@ fun MainApp(
         composable(AppDestinations.GAME_MODE) {
             GameModeScreen(
                 gameViewModel = gameViewModel,
-                mainViewModel = viewModel,
-                onNavigateBack = { navController.popBackStack() },
                 onNavigateToGameplay = { navController.navigate(AppDestinations.GAMEPLAY) }
             )
         }
@@ -83,7 +78,6 @@ fun MainApp(
         composable(AppDestinations.RESULT) {
             ResultScreen(
                 gameViewModel = gameViewModel,
-                mainViewModel = viewModel,
                 onNavigateHome = {
                     navController.navigate(AppDestinations.HOME) {
                         popUpTo(AppDestinations.HOME) { inclusive = true }
@@ -105,22 +99,19 @@ fun MainApp(
 
         composable(AppDestinations.COIN_SHOP) {
             CoinShopScreen(
-                mainViewModel = viewModel,
-                onNavigateBack = { navController.popBackStack() }
+                mainViewModel = viewModel
             )
         }
 
         composable(AppDestinations.PROGRESS) {
             ProgressScreen(
-                mainViewModel = viewModel,
-                onNavigateBack = { navController.popBackStack() }
+                mainViewModel = viewModel
             )
         }
 
         composable(AppDestinations.SETTINGS) {
             SettingsScreen(
-                mainViewModel = viewModel,
-                onNavigateBack = { navController.popBackStack() }
+                mainViewModel = viewModel
             )
         }
 
@@ -128,23 +119,18 @@ fun MainApp(
             DailyChallengesScreen(
                 mainViewModel = viewModel,
                 dailyChallengesViewModel = dailyChallengesViewModel,
-                onNavigateBack = { navController.popBackStack() },
                 onNavigateToPlay = { navController.navigate(AppDestinations.GAME_MODE) }
             )
         }
 
         composable(AppDestinations.LEADERBOARD) {
             LeaderboardScreen(
-                mainViewModel = viewModel,
-                onNavigateBack = { navController.popBackStack() }
+                mainViewModel = viewModel
             )
         }
 
         composable(AppDestinations.HELP) {
-            HelpScreen(
-                mainViewModel = viewModel,
-                onNavigateBack = { navController.popBackStack() }
-            )
+            HelpScreen()
         }
     }
 }

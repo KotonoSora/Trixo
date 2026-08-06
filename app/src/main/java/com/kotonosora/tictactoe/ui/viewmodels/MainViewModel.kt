@@ -61,7 +61,6 @@ sealed class MainEvent {
         MainEvent()
 
     data class SetSoundEnabled(val enabled: Boolean) : MainEvent()
-    data class SetMusicEnabled(val enabled: Boolean) : MainEvent()
     data class RecordGameFinished(
         val won: Boolean,
         val score: Int = 0,
@@ -98,7 +97,6 @@ class MainViewModel(
             is MainEvent.AddUndos -> addUndos(event.amount)
             is MainEvent.ConsumeUndo -> consumeUndo(event.onSuccess, event.onFailure)
             is MainEvent.SetSoundEnabled -> setSoundEnabled(event.enabled)
-            is MainEvent.SetMusicEnabled -> setMusicEnabled(event.enabled)
             is MainEvent.RecordGameFinished -> recordGameFinished(
                 event.won,
                 event.score,
@@ -164,12 +162,6 @@ class MainViewModel(
     private fun setSoundEnabled(enabled: Boolean) {
         viewModelScope.launch {
             repository.setSoundEnabled(enabled)
-        }
-    }
-
-    private fun setMusicEnabled(enabled: Boolean) {
-        viewModelScope.launch {
-            repository.setMusicEnabled(enabled)
         }
     }
 

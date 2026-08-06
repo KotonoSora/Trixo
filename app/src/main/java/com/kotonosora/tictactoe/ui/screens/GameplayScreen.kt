@@ -19,7 +19,6 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
@@ -32,8 +31,6 @@ import androidx.compose.material.icons.rounded.RadioButtonUnchecked
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -52,7 +49,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.kotonosora.tictactoe.audio.LocalSoundManager
 import com.kotonosora.tictactoe.audio.SoundManager
-import com.kotonosora.tictactoe.ui.components.MainTopBar
 import com.kotonosora.tictactoe.ui.components.NeonButton
 import com.kotonosora.tictactoe.ui.components.NeonText
 import com.kotonosora.tictactoe.ui.theme.AppTheme
@@ -70,6 +66,7 @@ import com.kotonosora.tictactoe.ui.viewmodels.GameViewModel
 import com.kotonosora.tictactoe.ui.viewmodels.MainEvent
 import com.kotonosora.tictactoe.ui.viewmodels.MainViewModel
 import com.kotonosora.tictactoe.ui.viewmodels.Player
+import com.kotonosora.tictactoe.utils.AppConstants
 
 @Composable
 fun GameplayScreen(
@@ -102,13 +99,13 @@ fun GameplayScreen(
 
             mainViewModel.onEvent(
                 MainEvent.RecordGameFinished(
-                won = won,
-                score = gameState.score,
-                reward = gameState.reward,
-                onNewHighScore = {
-                    soundManager.playMilestone(gameState.score)
-                }
-            ))
+                    won = won,
+                    score = gameState.score,
+                    reward = gameState.reward,
+                    onNewHighScore = {
+                        soundManager.playMilestone(gameState.score)
+                    }
+                ))
 
             // Update daily challenges
             dailyChallengesViewModel.onEvent(DailyChallengesEvent.IncrementGamerProgress)
@@ -134,11 +131,9 @@ fun GameplayScreen(
 
     GameplayContent(
         gameState = gameState,
-        coins = userPreferences.coins,
         hints = userPreferences.hints,
         undos = userPreferences.undos,
         onNavigateBack = onNavigateBack,
-        onNavigateToShop = onNavigateToShop,
         onCellClicked = { index ->
             val cell = gameState.board[index]
             if (cell == Player.NONE && !gameState.isAiTurn && gameState.result == GameResult.NONE) {
@@ -152,48 +147,58 @@ fun GameplayScreen(
             if (userPreferences.hints > 0) {
                 mainViewModel.onEvent(
                     MainEvent.ConsumeHint(
-                    onSuccess = {
-                        soundManager.playTap()
-                        gameViewModel.onEvent(GameEvent.RequestHint)
-                        dailyChallengesViewModel.onEvent(DailyChallengesEvent.IncrementStrategistProgress)
-                    },
-                    onFailure = {
-                        soundManager.playError()
-                    }
-                ))
+                        onSuccess = {
+                            soundManager.playTap()
+                            gameViewModel.onEvent(GameEvent.RequestHint)
+                            dailyChallengesViewModel.onEvent(DailyChallengesEvent.IncrementStrategistProgress)
+                        },
+                        onFailure = {
+                            soundManager.playError()
+                        }
+                    ))
             } else {
-                mainViewModel.onEvent(MainEvent.SpendCoins(30, onSuccess = {
-                    soundManager.playTap()
-                    gameViewModel.onEvent(GameEvent.RequestHint)
-                    dailyChallengesViewModel.onEvent(DailyChallengesEvent.IncrementStrategistProgress)
-                }, onFailure = {
-                    soundManager.playError()
-                    Toast.makeText(context, "Not enough coins!", Toast.LENGTH_SHORT)
-                        .show()
-                }))
+                mainViewModel.onEvent(
+                    MainEvent.SpendCoins(
+                        AppConstants.Costs.HINT_COST,
+                        onSuccess = {
+                            soundManager.playTap()
+                            gameViewModel.onEvent(GameEvent.RequestHint)
+                            dailyChallengesViewModel.onEvent(DailyChallengesEvent.IncrementStrategistProgress)
+                        },
+                        onFailure = {
+                            soundManager.playError()
+                            Toast.makeText(context, "Not enough coins!", Toast.LENGTH_SHORT)
+                                .show()
+                        })
+                )
             }
         },
         onUseUndo = {
             if (userPreferences.undos > 0) {
                 mainViewModel.onEvent(
                     MainEvent.ConsumeUndo(
-                    onSuccess = {
-                        soundManager.playTap()
-                        gameViewModel.onEvent(GameEvent.UndoMove)
-                    },
-                    onFailure = {
-                        soundManager.playError()
-                    }
-                ))
+                        onSuccess = {
+                            soundManager.playTap()
+                            gameViewModel.onEvent(GameEvent.UndoMove)
+                        },
+                        onFailure = {
+                            soundManager.playError()
+                        }
+                    ))
             } else {
-                mainViewModel.onEvent(MainEvent.SpendCoins(15, onSuccess = {
-                    soundManager.playTap()
-                    gameViewModel.onEvent(GameEvent.UndoMove)
-                }, onFailure = {
-                    soundManager.playError()
-                    Toast.makeText(context, "Not enough coins!", Toast.LENGTH_SHORT)
-                        .show()
-                }))
+                mainViewModel.onEvent(
+                    MainEvent.SpendCoins(
+                        AppConstants.Costs.UNDO_COST,
+                        onSuccess = {
+                            soundManager.playTap()
+                            gameViewModel.onEvent(GameEvent.UndoMove)
+                        },
+                        onFailure = {
+                            soundManager.playError()
+                            Toast.makeText(context, "Not enough coins!", Toast.LENGTH_SHORT)
+                                .show()
+                        })
+                )
             }
         },
         modifier = modifier
@@ -203,97 +208,80 @@ fun GameplayScreen(
 @Composable
 fun GameplayContent(
     gameState: GameState,
-    coins: Int,
     hints: Int,
     undos: Int,
     onNavigateBack: () -> Unit,
-    onNavigateToShop: () -> Unit,
     onCellClicked: (Int) -> Unit,
     onUseHint: () -> Unit,
     onUseUndo: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Scaffold(
-        topBar = {
-            MainTopBar(
-                coins = coins,
-                title = "GAME",
-                onBackClick = onNavigateBack,
-                onShopClick = onNavigateToShop
-            )
-        },
-        containerColor = MaterialTheme.colorScheme.background,
-        modifier = modifier.fillMaxSize()
-    ) { innerPadding ->
-        Column(
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .padding(horizontal = 16.dp, vertical = 8.dp),
+        verticalArrangement = Arrangement.SpaceBetween,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Spacer(modifier = Modifier.height(4.dp))
+
+        PlayerTurnIndicator(gameState = gameState)
+
+        Box(
             modifier = Modifier
-                .padding(innerPadding)
-                .fillMaxSize()
-                .navigationBarsPadding()
-                .padding(horizontal = 16.dp, vertical = 8.dp),
-            verticalArrangement = Arrangement.SpaceBetween,
-            horizontalAlignment = Alignment.CenterHorizontally
+                .weight(1f)
+                .fillMaxWidth()
+                .padding(vertical = 12.dp)
+                .clip(RoundedCornerShape(16.dp))
+                .background(Color.White.copy(alpha = 0.03f))
+                .border(1.dp, Color.White.copy(alpha = 0.08f), RoundedCornerShape(16.dp)),
+            contentAlignment = Alignment.Center
         ) {
-            Spacer(modifier = Modifier.height(4.dp))
-
-            PlayerTurnIndicator(gameState = gameState)
-
-            Box(
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxWidth()
-                    .padding(vertical = 12.dp)
-                    .clip(RoundedCornerShape(16.dp))
-                    .background(Color.White.copy(alpha = 0.03f))
-                    .border(1.dp, Color.White.copy(alpha = 0.08f), RoundedCornerShape(16.dp)),
-                contentAlignment = Alignment.Center
-            ) {
-                TicTacToeBoard(
-                    gameState = gameState,
-                    onCellClicked = onCellClicked
-                )
-            }
-
-            // Power Ups (Only visible in AI mode)
-            if (!gameState.isPvP) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(bottom = 12.dp),
-                    horizontalArrangement = Arrangement.SpaceEvenly
-                ) {
-                    PowerUpButton(
-                        icon = Icons.Rounded.Lightbulb,
-                        cost = 30,
-                        count = hints,
-                        onClick = {
-                            if (gameState.isAiTurn || gameState.result != GameResult.NONE) return@PowerUpButton
-                            onUseHint()
-                        }
-                    )
-                    PowerUpButton(
-                        icon = Icons.Rounded.History,
-                        cost = 15,
-                        count = undos,
-                        onClick = {
-                            if (gameState.isAiTurn || gameState.result != GameResult.NONE || gameState.history.isEmpty()) return@PowerUpButton
-                            onUseUndo()
-                        }
-                    )
-                }
-            }
-
-            NeonButton(
-                text = "SURRENDER",
-                onClick = onNavigateBack,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 8.dp),
-                color = NeonRed,
-                height = 64,
-                fontSize = 18
+            TicTacToeBoard(
+                gameState = gameState,
+                onCellClicked = onCellClicked
             )
         }
+
+        // Power Ups (Only visible in AI mode)
+        if (!gameState.isPvP) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 12.dp),
+                horizontalArrangement = Arrangement.SpaceEvenly
+            ) {
+                PowerUpButton(
+                    icon = Icons.Rounded.Lightbulb,
+                    cost = AppConstants.Costs.HINT_COST,
+                    count = hints,
+                    onClick = {
+                        if (gameState.isAiTurn || gameState.result != GameResult.NONE) return@PowerUpButton
+                        onUseHint()
+                    }
+                )
+                PowerUpButton(
+                    icon = Icons.Rounded.History,
+                    cost = AppConstants.Costs.UNDO_COST,
+                    count = undos,
+                    onClick = {
+                        if (gameState.isAiTurn || gameState.result != GameResult.NONE || gameState.history.isEmpty()) return@PowerUpButton
+                        onUseUndo()
+                    }
+                )
+            }
+        }
+
+        NeonButton(
+            text = "SURRENDER",
+            onClick = onNavigateBack,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 8.dp),
+            color = NeonRed,
+            height = 64,
+            fontSize = 18
+        )
     }
 }
 
@@ -459,46 +447,38 @@ fun CellIcon(player: Player) {
     }
 }
 
-@Preview(showBackground = true)
+@Preview(showBackground = true, backgroundColor = 0xFF000000)
 @Composable
 fun GameplayScreenPreview() {
-    CompositionLocalProvider(LocalSoundManager provides SoundManager(null)) {
-        AppTheme {
-            GameplayContent(
-                gameState = GameState(
-                    difficulty = Difficulty.EASY,
-                    board = List(9) { Player.NONE }),
-                coins = 300,
-                hints = 2,
-                undos = 5,
-                onNavigateBack = {},
-                onNavigateToShop = {},
-                onCellClicked = {},
-                onUseHint = {},
-                onUseUndo = {}
-            )
-        }
+    AppTheme {
+        GameplayContent(
+            gameState = GameState(
+                difficulty = Difficulty.EASY,
+                board = List(9) { Player.NONE }),
+            hints = 2,
+            undos = 5,
+            onNavigateBack = {},
+            onCellClicked = {},
+            onUseHint = {},
+            onUseUndo = {}
+        )
     }
 }
 
-@Preview(showBackground = true, name = "Large Board")
+@Preview(showBackground = true, backgroundColor = 0xFF000000, name = "Large Board")
 @Composable
 fun GameplayScreenLargePreview() {
-    CompositionLocalProvider(LocalSoundManager provides SoundManager(null)) {
-        AppTheme {
-            GameplayContent(
-                gameState = GameState(
-                    difficulty = Difficulty.VERY_HARD,
-                    board = List(225) { Player.NONE }),
-                coins = 300,
-                hints = 0,
-                undos = 0,
-                onNavigateBack = {},
-                onNavigateToShop = {},
-                onCellClicked = {},
-                onUseHint = {},
-                onUseUndo = {}
-            )
-        }
+    AppTheme {
+        GameplayContent(
+            gameState = GameState(
+                difficulty = Difficulty.VERY_HARD,
+                board = List(225) { Player.NONE }),
+            hints = 0,
+            undos = 0,
+            onNavigateBack = {},
+            onCellClicked = {},
+            onUseHint = {},
+            onUseUndo = {}
+        )
     }
 }

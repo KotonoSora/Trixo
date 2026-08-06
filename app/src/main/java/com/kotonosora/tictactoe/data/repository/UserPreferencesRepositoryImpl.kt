@@ -8,6 +8,7 @@ import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.longPreferencesKey
 import com.kotonosora.tictactoe.domain.model.UserPreferences
 import com.kotonosora.tictactoe.domain.repository.UserPreferencesRepository
+import com.kotonosora.tictactoe.utils.AppConstants
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
@@ -21,21 +22,20 @@ class UserPreferencesRepositoryImpl(private val dataStore: DataStore<Preferences
         val GAMES_PLAYED = intPreferencesKey("games_played")
         val GAMES_WON = intPreferencesKey("games_won")
         val SOUND_ENABLED = booleanPreferencesKey("sound_enabled")
-        val MUSIC_ENABLED = booleanPreferencesKey("music_enabled")
         val LAST_CHALLENGE_RESET_TIME = longPreferencesKey("last_challenge_reset_time")
         val CHALLENGE_PROGRESS_PREFIX = "challenge_progress_"
         val CHALLENGE_CLAIMED_PREFIX = "challenge_claimed_"
     }
 
     override val userPreferencesFlow: Flow<UserPreferences> = dataStore.data.map { preferences ->
-        val coins = preferences[PreferencesKeys.COINS] ?: 300
+        val coins = preferences[PreferencesKeys.COINS] ?: AppConstants.Defaults.INITIAL_COINS
         val highScore = preferences[PreferencesKeys.HIGH_SCORE] ?: 0
-        val hints = preferences[PreferencesKeys.HINTS] ?: 0
-        val undos = preferences[PreferencesKeys.UNDOS] ?: 0
+        val hints = preferences[PreferencesKeys.HINTS] ?: AppConstants.Defaults.INITIAL_HINTS
+        val undos = preferences[PreferencesKeys.UNDOS] ?: AppConstants.Defaults.INITIAL_UNDOS
         val gamesPlayed = preferences[PreferencesKeys.GAMES_PLAYED] ?: 0
         val gamesWon = preferences[PreferencesKeys.GAMES_WON] ?: 0
-        val soundEnabled = preferences[PreferencesKeys.SOUND_ENABLED] ?: true
-        val musicEnabled = preferences[PreferencesKeys.MUSIC_ENABLED] ?: true
+        val soundEnabled =
+            preferences[PreferencesKeys.SOUND_ENABLED] ?: AppConstants.Defaults.SOUND_ENABLED
         val lastResetTime = preferences[PreferencesKeys.LAST_CHALLENGE_RESET_TIME] ?: 0L
 
         val challengeProgress = mutableMapOf<String, Int>()
@@ -58,7 +58,6 @@ class UserPreferencesRepositoryImpl(private val dataStore: DataStore<Preferences
             gamesPlayed = gamesPlayed,
             gamesWon = gamesWon,
             soundEnabled = soundEnabled,
-            musicEnabled = musicEnabled,
             lastChallengeResetTime = lastResetTime,
             challengeProgress = challengeProgress,
             challengeClaimed = challengeClaimed,
@@ -86,7 +85,7 @@ class UserPreferencesRepositoryImpl(private val dataStore: DataStore<Preferences
 
     override suspend fun addCoins(amount: Int) {
         dataStore.edit { preferences ->
-            val current = preferences[PreferencesKeys.COINS] ?: 300
+            val current = preferences[PreferencesKeys.COINS] ?: AppConstants.Defaults.INITIAL_COINS
             preferences[PreferencesKeys.COINS] = current + amount
         }
     }
@@ -132,7 +131,7 @@ class UserPreferencesRepositoryImpl(private val dataStore: DataStore<Preferences
     override suspend fun spendCoins(amount: Int): Boolean {
         var spent = false
         dataStore.edit { preferences ->
-            val current = preferences[PreferencesKeys.COINS] ?: 300
+            val current = preferences[PreferencesKeys.COINS] ?: AppConstants.Defaults.INITIAL_COINS
             if (current >= amount) {
                 preferences[PreferencesKeys.COINS] = current - amount
                 spent = true
@@ -158,12 +157,6 @@ class UserPreferencesRepositoryImpl(private val dataStore: DataStore<Preferences
     override suspend fun setSoundEnabled(enabled: Boolean) {
         dataStore.edit { preferences ->
             preferences[PreferencesKeys.SOUND_ENABLED] = enabled
-        }
-    }
-
-    override suspend fun setMusicEnabled(enabled: Boolean) {
-        dataStore.edit { preferences ->
-            preferences[PreferencesKeys.MUSIC_ENABLED] = enabled
         }
     }
 
