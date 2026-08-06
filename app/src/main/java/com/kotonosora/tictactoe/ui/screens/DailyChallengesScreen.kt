@@ -39,13 +39,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.kotonosora.tictactoe.ui.MainViewModel
 import com.kotonosora.tictactoe.ui.components.NeonText
-import com.kotonosora.tictactoe.ui.components.TrixoTopBar
+import com.kotonosora.tictactoe.ui.components.MainTopBar
 import com.kotonosora.tictactoe.ui.theme.NeonCyan
 import com.kotonosora.tictactoe.ui.theme.NeonGreen
 import com.kotonosora.tictactoe.ui.theme.NeonMagenta
 import com.kotonosora.tictactoe.ui.theme.NeonYellow
 import com.kotonosora.tictactoe.ui.theme.PressStart2PFontFamily
-import com.kotonosora.tictactoe.ui.theme.TrixoTheme
+import com.kotonosora.tictactoe.ui.theme.AppTheme
 import com.kotonosora.tictactoe.ui.viewmodels.DailyChallenge
 import com.kotonosora.tictactoe.ui.viewmodels.DailyChallengesEvent
 import com.kotonosora.tictactoe.ui.viewmodels.DailyChallengesViewModel
@@ -85,7 +85,7 @@ fun DailyChallengesContent(
 ) {
     Scaffold(
         topBar = {
-            TrixoTopBar(
+            MainTopBar(
                 coins = coins,
                 title = "CHALLENGES",
                 onBackClick = onNavigateBack
@@ -210,7 +210,7 @@ fun ChallengeItem(
 @Preview(showBackground = true)
 @Composable
 fun DailyChallengesPreview() {
-    TrixoTheme {
+    AppTheme {
         DailyChallengesContent(
             coins = 500,
             challenges = listOf(

@@ -1,6 +1,6 @@
 package com.kotonosora.tictactoe.ui.navigation
 
-object TrixoDestinations {
+object AppDestinations {
     const val HOME = "home"
     const val GAME_MODE = "game_mode"
     const val GAMEPLAY = "gameplay"

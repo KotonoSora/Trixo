@@ -28,10 +28,10 @@ import com.kotonosora.tictactoe.domain.model.GameHistory
 import com.kotonosora.tictactoe.ui.MainViewModel
 import com.kotonosora.tictactoe.ui.components.NeonText
 import com.kotonosora.tictactoe.ui.components.NeonTitle
-import com.kotonosora.tictactoe.ui.components.TrixoTopBar
+import com.kotonosora.tictactoe.ui.components.MainTopBar
 import com.kotonosora.tictactoe.ui.theme.NeonCyan
 import com.kotonosora.tictactoe.ui.theme.NeonYellow
-import com.kotonosora.tictactoe.ui.theme.TrixoTheme
+import com.kotonosora.tictactoe.ui.theme.AppTheme
 
 @Composable
 fun LeaderboardScreen(
@@ -59,7 +59,7 @@ fun LeaderboardScreenContent(
 ) {
     Scaffold(
         topBar = {
-            TrixoTopBar(
+            MainTopBar(
                 coins = coins,
                 title = "MY HISTORY",
                 onBackClick = onNavigateBack
@@ -176,7 +176,7 @@ fun LeaderboardItem(entry: GameHistory) {
 @Preview(showBackground = true)
 @Composable
 fun LeaderboardScreenPreview() {
-    TrixoTheme {
+    AppTheme {
         LeaderboardScreenContent(
             coins = 250,
             history = listOf(

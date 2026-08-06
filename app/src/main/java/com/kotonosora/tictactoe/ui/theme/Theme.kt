@@ -37,7 +37,7 @@ private val DarkColorScheme = darkColorScheme(
 )
 
 @Composable
-fun TrixoTheme(
+fun AppTheme(
     content: @Composable () -> Unit
 ) {
     val colorScheme = DarkColorScheme

@@ -31,7 +31,7 @@ import com.kotonosora.tictactoe.ui.theme.NeonCyan
 import com.kotonosora.tictactoe.ui.theme.NeonYellow
 
 @Composable
-fun TrixoTopBar(
+fun MainTopBar(
     coins: Int,
     modifier: Modifier = Modifier,
     title: String? = null,

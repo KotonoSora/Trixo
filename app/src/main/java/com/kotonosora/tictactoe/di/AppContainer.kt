@@ -2,7 +2,7 @@ package com.kotonosora.tictactoe.di
 
 import android.content.Context
 import com.kotonosora.tictactoe.billing.BillingManager
-import com.kotonosora.tictactoe.data.TrixoDatabase
+import com.kotonosora.tictactoe.data.AppDatabase
 import com.kotonosora.tictactoe.data.dataStore
 import com.kotonosora.tictactoe.data.repository.GameHistoryRepositoryImpl
 import com.kotonosora.tictactoe.data.repository.UserPreferencesRepositoryImpl
@@ -25,8 +25,8 @@ interface AppContainer {
 
 class AppContainerImpl(private val context: Context) : AppContainer {
 
-    private val database: TrixoDatabase by lazy {
-        TrixoDatabase.getDatabase(context)
+    private val database: AppDatabase by lazy {
+        AppDatabase.getDatabase(context)
     }
 
     override val userPreferencesRepository: UserPreferencesRepository by lazy {

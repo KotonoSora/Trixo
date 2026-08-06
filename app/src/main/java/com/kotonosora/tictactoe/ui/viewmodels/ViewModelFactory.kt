@@ -6,7 +6,7 @@ import com.kotonosora.tictactoe.di.AppContainer
 import com.kotonosora.tictactoe.domain.GameViewModel
 import com.kotonosora.tictactoe.ui.MainViewModel
 
-class TrixoViewModelFactory(private val container: AppContainer) : ViewModelProvider.Factory {
+class AppViewModelFactory(private val container: AppContainer) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         return when {
             modelClass.isAssignableFrom(MainViewModel::class.java) -> {

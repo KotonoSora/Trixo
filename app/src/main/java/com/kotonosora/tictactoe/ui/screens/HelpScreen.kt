@@ -16,7 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.kotonosora.tictactoe.ui.MainViewModel
 import com.kotonosora.tictactoe.ui.components.NeonText
-import com.kotonosora.tictactoe.ui.components.TrixoTopBar
+import com.kotonosora.tictactoe.ui.components.MainTopBar
 
 @Composable
 fun HelpScreen(
@@ -28,7 +28,7 @@ fun HelpScreen(
 
     Scaffold(
         topBar = {
-            TrixoTopBar(
+            MainTopBar(
                 coins = userPreferences.coins,
                 title = "HELP",
                 onBackClick = onNavigateBack

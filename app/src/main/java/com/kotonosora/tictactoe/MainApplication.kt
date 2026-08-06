@@ -4,7 +4,7 @@ import android.app.Application
 import com.kotonosora.tictactoe.di.AppContainer
 import com.kotonosora.tictactoe.di.AppContainerImpl
 
-class TrixoApplication : Application() {
+class MainApplication : Application() {
     lateinit var container: AppContainer
 
     override fun onCreate() {

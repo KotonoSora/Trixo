@@ -32,7 +32,7 @@ import androidx.compose.ui.unit.dp
 import com.kotonosora.tictactoe.audio.LocalSoundManager
 import com.kotonosora.tictactoe.ui.MainViewModel
 import com.kotonosora.tictactoe.ui.components.NeonText
-import com.kotonosora.tictactoe.ui.components.TrixoTopBar
+import com.kotonosora.tictactoe.ui.components.MainTopBar
 import com.kotonosora.tictactoe.ui.theme.NeonCyan
 import com.kotonosora.tictactoe.ui.theme.NeonMagenta
 import com.kotonosora.tictactoe.ui.theme.NeonYellow
@@ -48,7 +48,7 @@ fun SettingsScreen(
 
     Scaffold(
         topBar = {
-            TrixoTopBar(
+            MainTopBar(
                 coins = userPreferences.coins,
                 title = "OPTIONS",
                 onBackClick = onNavigateBack

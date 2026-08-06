@@ -11,7 +11,7 @@ import androidx.navigation.compose.rememberNavController
 import com.kotonosora.tictactoe.di.LocalAppContainer
 import com.kotonosora.tictactoe.domain.GameEvent
 import com.kotonosora.tictactoe.domain.GameViewModel
-import com.kotonosora.tictactoe.ui.navigation.TrixoDestinations
+import com.kotonosora.tictactoe.ui.navigation.AppDestinations
 import com.kotonosora.tictactoe.ui.screens.CoinShopScreen
 import com.kotonosora.tictactoe.ui.screens.DailyChallengesScreen
 import com.kotonosora.tictactoe.ui.screens.GameModeScreen
@@ -23,106 +23,106 @@ import com.kotonosora.tictactoe.ui.screens.ProgressScreen
 import com.kotonosora.tictactoe.ui.screens.ResultScreen
 import com.kotonosora.tictactoe.ui.screens.SettingsScreen
 import com.kotonosora.tictactoe.ui.viewmodels.DailyChallengesViewModel
-import com.kotonosora.tictactoe.ui.viewmodels.TrixoViewModelFactory
+import com.kotonosora.tictactoe.ui.viewmodels.AppViewModelFactory
 
 @Composable
-fun TrixoApp(
+fun MainApp(
     viewModel: MainViewModel,
     modifier: Modifier = Modifier,
     navController: NavHostController = rememberNavController()
 ) {
     val container = LocalAppContainer.current
-    val factory = remember(container) { TrixoViewModelFactory(container) }
+    val factory = remember(container) { AppViewModelFactory(container) }
 
-    // Shared GameViewModel scoped to TrixoApp lifecycle
+    // Shared GameViewModel scoped to MainApp lifecycle
     val gameViewModel: GameViewModel = viewModel(factory = factory)
     val dailyChallengesViewModel: DailyChallengesViewModel = viewModel(factory = factory)
 
     NavHost(
         navController = navController,
-        startDestination = TrixoDestinations.HOME,
+        startDestination = AppDestinations.HOME,
         modifier = modifier
     ) {
-        composable(TrixoDestinations.HOME) {
+        composable(AppDestinations.HOME) {
             HomeScreen(
                 viewModel = viewModel,
-                onNavigateToGameMode = { navController.navigate(TrixoDestinations.GAME_MODE) },
-                onNavigateToCoinShop = { navController.navigate(TrixoDestinations.COIN_SHOP) },
-                onNavigateToSettings = { navController.navigate(TrixoDestinations.SETTINGS) },
-                onNavigateToDailyChallenges = { navController.navigate(TrixoDestinations.DAILY_CHALLENGES) },
-                onNavigateToLeaderboard = { navController.navigate(TrixoDestinations.LEADERBOARD) },
-                onNavigateToHelp = { navController.navigate(TrixoDestinations.HELP) }
+                onNavigateToGameMode = { navController.navigate(AppDestinations.GAME_MODE) },
+                onNavigateToCoinShop = { navController.navigate(AppDestinations.COIN_SHOP) },
+                onNavigateToSettings = { navController.navigate(AppDestinations.SETTINGS) },
+                onNavigateToDailyChallenges = { navController.navigate(AppDestinations.DAILY_CHALLENGES) },
+                onNavigateToLeaderboard = { navController.navigate(AppDestinations.LEADERBOARD) },
+                onNavigateToHelp = { navController.navigate(AppDestinations.HELP) }
             )
         }
 
-        composable(TrixoDestinations.GAME_MODE) {
+        composable(AppDestinations.GAME_MODE) {
             GameModeScreen(
                 gameViewModel = gameViewModel,
                 mainViewModel = viewModel,
                 onNavigateBack = { navController.popBackStack() },
-                onNavigateToGameplay = { navController.navigate(TrixoDestinations.GAMEPLAY) }
+                onNavigateToGameplay = { navController.navigate(AppDestinations.GAMEPLAY) }
             )
         }
 
-        composable(TrixoDestinations.GAMEPLAY) {
+        composable(AppDestinations.GAMEPLAY) {
             GameplayScreen(
                 gameViewModel = gameViewModel,
                 mainViewModel = viewModel,
                 dailyChallengesViewModel = dailyChallengesViewModel,
                 onNavigateToResult = {
-                    navController.navigate(TrixoDestinations.RESULT) {
-                        popUpTo(TrixoDestinations.GAME_MODE) { inclusive = false }
+                    navController.navigate(AppDestinations.RESULT) {
+                        popUpTo(AppDestinations.GAME_MODE) { inclusive = false }
                     }
                 },
                 onNavigateBack = { navController.popBackStack() }
             )
         }
 
-        composable(TrixoDestinations.RESULT) {
+        composable(AppDestinations.RESULT) {
             ResultScreen(
                 gameViewModel = gameViewModel,
                 mainViewModel = viewModel,
                 onNavigateHome = {
-                    navController.navigate(TrixoDestinations.HOME) {
-                        popUpTo(TrixoDestinations.HOME) { inclusive = true }
+                    navController.navigate(AppDestinations.HOME) {
+                        popUpTo(AppDestinations.HOME) { inclusive = true }
                     }
                 },
                 onNavigateToGameMode = {
-                    navController.navigate(TrixoDestinations.GAME_MODE) {
-                        popUpTo(TrixoDestinations.HOME) { inclusive = false }
+                    navController.navigate(AppDestinations.GAME_MODE) {
+                        popUpTo(AppDestinations.HOME) { inclusive = false }
                     }
                 },
                 onNavigateToNextLevel = { nextDifficulty ->
                     gameViewModel.onEvent(GameEvent.ResetGame(nextDifficulty, isPvP = false))
-                    navController.navigate(TrixoDestinations.GAMEPLAY) {
-                        popUpTo(TrixoDestinations.HOME) { inclusive = false }
+                    navController.navigate(AppDestinations.GAMEPLAY) {
+                        popUpTo(AppDestinations.HOME) { inclusive = false }
                     }
                 }
             )
         }
 
-        composable(TrixoDestinations.COIN_SHOP) {
+        composable(AppDestinations.COIN_SHOP) {
             CoinShopScreen(
                 mainViewModel = viewModel,
                 onNavigateBack = { navController.popBackStack() }
             )
         }
 
-        composable(TrixoDestinations.PROGRESS) {
+        composable(AppDestinations.PROGRESS) {
             ProgressScreen(
                 mainViewModel = viewModel,
                 onNavigateBack = { navController.popBackStack() }
             )
         }
 
-        composable(TrixoDestinations.SETTINGS) {
+        composable(AppDestinations.SETTINGS) {
             SettingsScreen(
                 mainViewModel = viewModel,
                 onNavigateBack = { navController.popBackStack() }
             )
         }
 
-        composable(TrixoDestinations.DAILY_CHALLENGES) {
+        composable(AppDestinations.DAILY_CHALLENGES) {
             DailyChallengesScreen(
                 mainViewModel = viewModel,
                 dailyChallengesViewModel = dailyChallengesViewModel,
@@ -130,14 +130,14 @@ fun TrixoApp(
             )
         }
 
-        composable(TrixoDestinations.LEADERBOARD) {
+        composable(AppDestinations.LEADERBOARD) {
             LeaderboardScreen(
                 mainViewModel = viewModel,
                 onNavigateBack = { navController.popBackStack() }
             )
         }
 
-        composable(TrixoDestinations.HELP) {
+        composable(AppDestinations.HELP) {
             HelpScreen(
                 mainViewModel = viewModel,
                 onNavigateBack = { navController.popBackStack() }

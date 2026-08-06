@@ -37,12 +37,12 @@ import com.kotonosora.tictactoe.ui.MainViewModel
 import com.kotonosora.tictactoe.ui.components.NeonButton
 import com.kotonosora.tictactoe.ui.components.NeonText
 import com.kotonosora.tictactoe.ui.components.NeonTitle
-import com.kotonosora.tictactoe.ui.components.TrixoTopBar
+import com.kotonosora.tictactoe.ui.components.MainTopBar
 import com.kotonosora.tictactoe.ui.theme.NeonGreen
 import com.kotonosora.tictactoe.ui.theme.NeonMagenta
 import com.kotonosora.tictactoe.ui.theme.NeonRed
 import com.kotonosora.tictactoe.ui.theme.NeonYellow
-import com.kotonosora.tictactoe.ui.theme.TrixoTheme
+import com.kotonosora.tictactoe.ui.theme.AppTheme
 
 @Composable
 fun ResultScreen(
@@ -91,7 +91,7 @@ fun ResultScreenContent(
 
     Scaffold(
         topBar = {
-            TrixoTopBar(
+            MainTopBar(
                 coins = coins,
                 title = topBarTitle
             )
@@ -226,7 +226,7 @@ private fun RewardDisplay(amount: Int, iconSize: Int, fontSize: Int) {
 @Composable
 fun ResultScreenWinPreview() {
     CompositionLocalProvider(LocalSoundManager provides SoundManager(null)) {
-        TrixoTheme {
+        AppTheme {
             ResultScreenContent(
                 gameState = GameState(result = GameResult.X_WINS, difficulty = Difficulty.EASY),
                 coins = 150,
@@ -242,7 +242,7 @@ fun ResultScreenWinPreview() {
 @Composable
 fun ResultScreenLosePreview() {
     CompositionLocalProvider(LocalSoundManager provides SoundManager(null)) {
-        TrixoTheme {
+        AppTheme {
             ResultScreenContent(
                 gameState = GameState(result = GameResult.O_WINS, difficulty = Difficulty.MEDIUM),
                 coins = 100,
@@ -258,7 +258,7 @@ fun ResultScreenLosePreview() {
 @Composable
 fun ResultScreenDrawPreview() {
     CompositionLocalProvider(LocalSoundManager provides SoundManager(null)) {
-        TrixoTheme {
+        AppTheme {
             ResultScreenContent(
                 gameState = GameState(result = GameResult.DRAW, difficulty = Difficulty.HARD),
                 coins = 120,

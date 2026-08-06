@@ -27,13 +27,13 @@ import androidx.compose.ui.tooling.preview.Preview
 import com.kotonosora.tictactoe.ui.MainViewModel
 import com.kotonosora.tictactoe.ui.components.NeonButton
 import com.kotonosora.tictactoe.ui.components.NeonTitle
-import com.kotonosora.tictactoe.ui.components.TrixoTopBar
+import com.kotonosora.tictactoe.ui.components.MainTopBar
 import com.kotonosora.tictactoe.ui.theme.NeonBlue
 import com.kotonosora.tictactoe.ui.theme.NeonCyan
 import com.kotonosora.tictactoe.ui.theme.NeonGreen
 import com.kotonosora.tictactoe.ui.theme.NeonMagenta
 import com.kotonosora.tictactoe.ui.theme.NeonYellow
-import com.kotonosora.tictactoe.ui.theme.TrixoTheme
+import com.kotonosora.tictactoe.ui.theme.AppTheme
 
 @Composable
 fun HomeScreen(
@@ -73,7 +73,7 @@ fun HomeScreenContent(
 ) {
     Scaffold(
         topBar = {
-            TrixoTopBar(
+            MainTopBar(
                 coins = coins,
                 onShopClick = onNavigateToCoinShop
             )
@@ -176,7 +176,7 @@ fun HomeScreenContent(
 @Preview(showBackground = true)
 @Composable
 fun HomeScreenPreview() {
-    TrixoTheme {
+    AppTheme {
         HomeScreenContent(
             coins = 300,
             onNavigateToGameMode = {},

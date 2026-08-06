@@ -35,7 +35,7 @@ import com.kotonosora.tictactoe.audio.LocalSoundManager
 import com.kotonosora.tictactoe.billing.BillingManager
 import com.kotonosora.tictactoe.ui.MainViewModel
 import com.kotonosora.tictactoe.ui.components.NeonButton
-import com.kotonosora.tictactoe.ui.components.TrixoTopBar
+import com.kotonosora.tictactoe.ui.components.MainTopBar
 import com.kotonosora.tictactoe.ui.theme.NeonYellow
 
 @Composable
@@ -64,7 +64,7 @@ fun CoinShopScreen(
 
     Scaffold(
         topBar = {
-            TrixoTopBar(
+            MainTopBar(
                 coins = userPreferences.coins,
                 title = "COIN SHOP",
                 onBackClick = onNavigateBack

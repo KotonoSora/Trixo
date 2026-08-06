@@ -14,9 +14,9 @@ import com.kotonosora.tictactoe.audio.LocalSoundManager
 import com.kotonosora.tictactoe.audio.SoundManager
 import com.kotonosora.tictactoe.di.LocalAppContainer
 import com.kotonosora.tictactoe.ui.MainViewModel
-import com.kotonosora.tictactoe.ui.TrixoApp
-import com.kotonosora.tictactoe.ui.theme.TrixoTheme
-import com.kotonosora.tictactoe.ui.viewmodels.TrixoViewModelFactory
+import com.kotonosora.tictactoe.ui.MainApp
+import com.kotonosora.tictactoe.ui.theme.AppTheme
+import com.kotonosora.tictactoe.ui.viewmodels.AppViewModelFactory
 
 class MainActivity : ComponentActivity() {
     private lateinit var viewModel: MainViewModel
@@ -25,11 +25,11 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
-        val container = (application as TrixoApplication).container
+        val container = (application as MainApplication).container
 
         viewModel = ViewModelProvider(
             this,
-            TrixoViewModelFactory(container)
+            AppViewModelFactory(container)
         )[MainViewModel::class.java]
 
         setContent {
@@ -48,8 +48,8 @@ class MainActivity : ComponentActivity() {
                 LocalSoundManager provides soundManager,
                 LocalAppContainer provides container
             ) {
-                TrixoTheme {
-                    TrixoApp(viewModel = viewModel)
+                AppTheme {
+                    MainApp(viewModel = viewModel)
                 }
             }
         }
