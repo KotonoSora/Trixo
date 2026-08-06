@@ -55,8 +55,7 @@ google-services.json
 .agent
 input_images/
 
+.artifacts/
 .kotlin/
-
 app/release/**/*.dm
-
 keystore.properties

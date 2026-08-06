@@ -22,5 +22,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "Trixo"
+rootProject.name = "BlitzXO"
 include(":app")
