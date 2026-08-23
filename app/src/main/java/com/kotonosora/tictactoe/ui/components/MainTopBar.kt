@@ -20,6 +20,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.rounded.MonetizationOn
 import androidx.compose.material.icons.rounded.ShoppingCart
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -40,10 +41,12 @@ fun MainTopBar(
     title: String? = null,
     onBackClick: (() -> Unit)? = null,
     onShopClick: (() -> Unit)? = null,
+    showShopIcon: Boolean = false,
 ) {
     Box(
         modifier = modifier
             .fillMaxWidth()
+            .background(MaterialTheme.colorScheme.background)
             .statusBarsPadding()
             .padding(horizontal = 16.dp, vertical = 8.dp)
             .height(56.dp)
@@ -63,11 +66,11 @@ fun MainTopBar(
         if (title != null) {
             NeonTitle(
                 text = title,
-                fontSize = 18,
-                textAlign = TextAlign.Center,
+                fontSize = 16,
+                textAlign = TextAlign.Left,
                 modifier = Modifier
-                    .align(Alignment.Center)
-                    .padding(horizontal = 80.dp), // Avoid overlap with buttons
+                    .align(Alignment.CenterStart)
+                    .padding(start = 60.dp, end = 80.dp), // Avoid overlap with buttons
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
@@ -81,7 +84,7 @@ fun MainTopBar(
         ) {
             CoinCapsule(coins = coins, onClick = onShopClick)
 
-            if (onShopClick != null) {
+            if (showShopIcon && onShopClick != null) {
                 NeonIconButton(
                     icon = Icons.Rounded.ShoppingCart,
                     contentDescription = "Shop",
@@ -133,9 +136,15 @@ fun CoinCapsule(
 fun MainTopBarPreview() {
     AppTheme {
         Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-            MainTopBar(coins = 500)
+            MainTopBar(coins = 500, showShopIcon = true)
             MainTopBar(coins = 1200, title = "SCREEN TITLE", onBackClick = {})
-            MainTopBar(coins = 2500, title = "SHOP", onBackClick = {}, onShopClick = {})
+            MainTopBar(
+                coins = 2500,
+                title = "SHOP",
+                onBackClick = {},
+                onShopClick = {},
+                showShopIcon = true
+            )
         }
     }
 }

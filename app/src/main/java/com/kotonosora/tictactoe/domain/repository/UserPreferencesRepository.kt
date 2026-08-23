@@ -16,7 +16,6 @@ interface UserPreferencesRepository {
     suspend fun incrementGamesPlayed()
     suspend fun incrementGamesWon()
     suspend fun setSoundEnabled(enabled: Boolean)
-    suspend fun setMusicEnabled(enabled: Boolean)
     suspend fun updateLastChallengeResetTime(time: Long)
     suspend fun updateChallengeProgress(id: String, progress: Int)
     suspend fun markChallengeClaimed(id: String)

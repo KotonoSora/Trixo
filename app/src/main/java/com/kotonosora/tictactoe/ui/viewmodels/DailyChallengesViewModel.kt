@@ -4,9 +4,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.kotonosora.tictactoe.domain.repository.UserPreferencesRepository
-import com.kotonosora.tictactoe.ui.theme.NeonCyan
-import com.kotonosora.tictactoe.ui.theme.NeonGreen
-import com.kotonosora.tictactoe.ui.theme.NeonMagenta
+import com.kotonosora.tictactoe.utils.AppConstants
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -42,15 +40,9 @@ sealed class DailyChallengesEvent {
 }
 
 class DailyChallengesViewModel(private val repository: UserPreferencesRepository) : ViewModel() {
-    companion object {
-        val INITIAL_CHALLENGES = listOf(
-            DailyChallenge("1", "GAMER", "Play 5 games", 0, 5, 50, NeonCyan),
-            DailyChallenge("2", "WINNER", "Win 2 games", 0, 2, 100, NeonMagenta),
-            DailyChallenge("3", "STRATEGIST", "Use 3 hints", 0, 3, 30, NeonGreen)
-        )
-    }
 
-    private val _uiState = MutableStateFlow(DailyChallengesUiState(challenges = INITIAL_CHALLENGES))
+    private val _uiState =
+        MutableStateFlow(DailyChallengesUiState(challenges = AppConstants.Challenges.INITIAL_CHALLENGES))
     val uiState: StateFlow<DailyChallengesUiState> = _uiState.asStateFlow()
 
     init {
@@ -63,7 +55,7 @@ class DailyChallengesViewModel(private val repository: UserPreferencesRepository
             repository.userPreferencesFlow.collect { prefs ->
                 _uiState.update { currentState ->
                     currentState.copy(
-                        challenges = INITIAL_CHALLENGES.map { challenge ->
+                        challenges = AppConstants.Challenges.INITIAL_CHALLENGES.map { challenge ->
                             challenge.copy(
                                 progress = prefs.challengeProgress[challenge.id] ?: 0,
                                 isClaimed = prefs.challengeClaimed[challenge.id] ?: false

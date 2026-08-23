@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -23,8 +22,6 @@ import androidx.compose.material.icons.rounded.MonetizationOn
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -38,7 +35,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.kotonosora.tictactoe.ui.components.MainTopBar
 import com.kotonosora.tictactoe.ui.components.NeonText
 import com.kotonosora.tictactoe.ui.theme.AppTheme
 import com.kotonosora.tictactoe.ui.theme.NeonCyan
@@ -56,15 +52,12 @@ import com.kotonosora.tictactoe.ui.viewmodels.MainViewModel
 fun DailyChallengesScreen(
     mainViewModel: MainViewModel,
     dailyChallengesViewModel: DailyChallengesViewModel,
-    onNavigateBack: () -> Unit,
     onNavigateToPlay: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val mainUiState by mainViewModel.uiState.collectAsState()
     val uiState by dailyChallengesViewModel.uiState.collectAsState()
 
     DailyChallengesContent(
-        coins = mainUiState.userPreferences.coins,
         challenges = uiState.challenges,
         onClaimReward = { challengeId ->
             dailyChallengesViewModel.onEvent(
@@ -74,46 +67,29 @@ fun DailyChallengesScreen(
             )
         },
         onPlay = onNavigateToPlay,
-        onNavigateBack = onNavigateBack,
         modifier = modifier
     )
 }
 
 @Composable
 fun DailyChallengesContent(
-    coins: Int,
     challenges: List<DailyChallenge>,
     onClaimReward: (String) -> Unit,
     onPlay: () -> Unit,
-    onNavigateBack: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Scaffold(
-        topBar = {
-            MainTopBar(
-                coins = coins,
-                title = "CHALLENGES",
-                onBackClick = onNavigateBack
+    LazyColumn(
+        modifier = modifier
+            .fillMaxSize()
+            .padding(24.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        items(challenges, key = { it.id }) { challenge ->
+            ChallengeItem(
+                challenge = challenge,
+                onClaimReward = { onClaimReward(challenge.id) },
+                onPlay = onPlay
             )
-        },
-        containerColor = MaterialTheme.colorScheme.background,
-        modifier = modifier.fillMaxSize()
-    ) { innerPadding ->
-        LazyColumn(
-            modifier = Modifier
-                .padding(innerPadding)
-                .fillMaxSize()
-                .navigationBarsPadding()
-                .padding(24.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            items(challenges, key = { it.id }) { challenge ->
-                ChallengeItem(
-                    challenge = challenge,
-                    onClaimReward = { onClaimReward(challenge.id) },
-                    onPlay = onPlay
-                )
-            }
         }
     }
 }
@@ -242,7 +218,6 @@ fun ChallengeItem(
 fun DailyChallengesPreview() {
     AppTheme {
         DailyChallengesContent(
-            coins = 500,
             challenges = listOf(
                 DailyChallenge("1", "GAMER", "Play 5 games", 2, 5, 50, NeonCyan),
                 DailyChallenge("2", "WINNER", "Win 2 games", 2, 2, 100, NeonMagenta),
@@ -258,8 +233,7 @@ fun DailyChallengesPreview() {
                 )
             ),
             onClaimReward = {},
-            onPlay = {},
-            onNavigateBack = {}
+            onPlay = {}
         )
     }
 }
