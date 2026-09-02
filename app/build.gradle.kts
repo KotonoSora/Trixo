@@ -12,9 +12,9 @@ configure<ApplicationExtension> {
 
     defaultConfig {
         applicationId = "com.kotonosora.tictactoe"
-        minSdk = 30
-        versionCode = 6
-        versionName = "3.0.0"
+        minSdk = 24
+        versionCode = 7
+        versionName = "3.1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
