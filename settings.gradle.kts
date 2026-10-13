@@ -24,3 +24,9 @@ dependencyResolutionManagement {
 
 rootProject.name = "BlitzXO"
 include(":app")
+include(":trixo-engine")
+include(":core-billing")
+include(":core-shop-coins")
+include(":core-ui")
+include(":trixo-shop")
+include(":trixo-ui")
