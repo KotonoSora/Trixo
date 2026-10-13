@@ -59,3 +59,7 @@ input_images/
 .kotlin/
 app/release/**/*.dm
 keystore.properties
+*.artifact.md
+
+AGENTS.md
+.opencode/

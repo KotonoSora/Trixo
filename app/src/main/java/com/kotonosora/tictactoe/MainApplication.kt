@@ -1,14 +1,15 @@
 package com.kotonosora.tictactoe
 
 import android.app.Application
-import com.kotonosora.tictactoe.di.AppContainer
-import com.kotonosora.tictactoe.di.AppContainerImpl
+import local.trixo.ui.di.AppContainer
+import local.trixo.ui.di.AppContainerHost
+import local.trixo.ui.di.DefaultAppContainer
 
-class MainApplication : Application() {
-    lateinit var container: AppContainer
+class MainApplication : Application(), AppContainerHost {
+    override lateinit var container: AppContainer
 
     override fun onCreate() {
         super.onCreate()
-        container = AppContainerImpl(this)
+        container = DefaultAppContainer(this, BuildConfig.DEBUG)
     }
 }
